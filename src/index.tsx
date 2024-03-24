@@ -4,7 +4,7 @@ import {
   staticClasses,
 } from "decky-frontend-lib";
 import { VFC } from "react";
-import { FaShip } from "react-icons/fa";
+import { FaDemocrat } from "react-icons/fa";
 import { AdvanceComponent, AutoUpdateComponent, MoreComponent, SwitchComponent } from "./components";
 import { PluginManager } from "./backend";
 
@@ -26,7 +26,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>SK Box</div>,
     content: <Content />,
-    icon: <FaShip />,
+    icon: <FaDemocrat />,
     onDismount() {
       PluginManager.unregister();
     },

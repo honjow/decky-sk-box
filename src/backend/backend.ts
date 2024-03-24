@@ -6,6 +6,10 @@ export class Backend {
     this.serverAPI = serverAPI;
   }
 
+  public static getServerAPI() {
+    return this.serverAPI;
+  }
+
   public static async updateLatest() {
     return await this.serverAPI!.callPluginMethod("update_latest", {});
   }
@@ -156,5 +160,35 @@ export class Backend {
     return await this.serverAPI!.callPluginMethod("set_hhd_update_enabled", {
       enabled: value,
     });
+  }
+
+  // boot_repair
+  public static async bootRepair() {
+    return await this.serverAPI!.callPluginMethod("boot_repair", {});
+  }
+
+  // re_first_run
+  public static async reFirstRun() {
+    return await this.serverAPI!.callPluginMethod("re_first_run", {});
+  }
+
+  // etc_repair
+  public static async etcRepair() {
+    return await this.serverAPI!.callPluginMethod("etc_repair", {});
+  }
+
+  // etc_repair_full
+  public static async etcRepairFull() {
+    return await this.serverAPI!.callPluginMethod("etc_repair_full", {});
+  }
+
+  // make_swapfile
+  public static async makeSwapfile() {
+    return await this.serverAPI!.callPluginMethod("make_swapfile", {});
+  }
+
+  // reset_gnome
+  public static async resetGnome() {
+    return await this.serverAPI!.callPluginMethod("reset_gnome", {});
   }
 }

@@ -213,7 +213,8 @@ def etc_repair():
 
 
 def re_first_run():
-    command = "sk-first-run"
+    # command = "sk-first-run"
+    command = f"sudo -u {USER} bash -c '/usr/bin/sk-first-run'"
     success, ret_msg = run_command(command, "重新运行首次配置脚本")
     return success, ret_msg
 
@@ -426,10 +427,10 @@ def get_autoupdate(pkg_name):
     return value == "true"
 
 
-def check_and_install_addon():
-    file_path = "/usr/bin/__sk-chos-tool-update"
-    if os.path.isfile(file_path):
-        return
-    else:
-        from installs import this_app_cn_install
-        this_app_cn_install()
+# def check_and_install_addon():
+#     file_path = "/usr/bin/__sk-chos-tool-update"
+#     if os.path.isfile(file_path):
+#         return
+#     else:
+#         from installs import this_app_cn_install
+#         this_app_cn_install()

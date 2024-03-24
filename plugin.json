@@ -4,7 +4,7 @@
   "flags": ["root"],
   "publish": {
     "tags": ["root"],
-    "description": "Decky example plugin.",
+    "description": "Decky plugins for Sk-ChimeraOS.",
     "image": "https://opengraph.githubassets.com/1/SteamDeckHomebrew/PluginLoader"
   }
 }

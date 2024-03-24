@@ -143,6 +143,57 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error setting HHD Update enabled: {e}")
             return False
+        
+    async def boot_repair(self):
+        try:
+            utils.boot_repair()
+            return True
+        except Exception as e:
+            logging.error(f"Error repairing boot: {e}")
+            return False
+        
+    async def re_first_run(self):
+        try:
+            code, msg = utils.re_first_run()
+            if code != 0:
+                logging.error(f"Error resetting first run: {msg}")
+                return False
+            return True
+        except Exception as e:
+            logging.error(f"Error resetting first run: {e}")
+            return False
+        
+    async def etc_repair(self):
+        try:
+            utils.etc_repair()
+            return True
+        except Exception as e:
+            logging.error(f"Error repairing etc: {e}")
+            return False
+
+    async def etc_repair_full(self):
+        try:
+            utils.etc_repair_full()
+            return True
+        except Exception as e:
+            logging.error(f"Error repairing etc: {e}")
+            return False
+        
+    async def make_swapfile(self):
+        try:
+            utils.make_swapfile()
+            return True
+        except Exception as e:
+            logging.error(f"Error making swapfile: {e}")
+            return False
+        
+    async def reset_gnome(self):
+        try:
+            utils.reset_gnome()
+            return True
+        except Exception as e:
+            logging.error(f"Error resetting gnome: {e}")
+            return False
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):

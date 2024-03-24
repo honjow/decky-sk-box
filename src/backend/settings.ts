@@ -19,6 +19,8 @@ export class Settings {
   private _enableAutoUpdateHHD: boolean = true;
   private _enableAutoUpdateSkChosTool: boolean = true;
 
+  private _swapfileMaking: boolean = false;
+
   private _currentVersion: string = "";
   private _latestVersion: string = "";
 
@@ -72,6 +74,14 @@ export class Settings {
     Backend.getSktUpdateEnabled().then((value) => {
       this._instance._enableAutoUpdateSkChosTool = value;
     });
+  }
+
+  public static get swapfileMaking(): boolean {
+    return this._instance._swapfileMaking;
+  }
+
+  public static set swapfileMaking(value: boolean) {
+    this._instance._swapfileMaking = value;
   }
 
   public static get showSwitch(): boolean {
