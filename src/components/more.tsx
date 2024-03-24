@@ -13,7 +13,7 @@ export const MoreComponent: VFC = () => {
     }
 
     return (
-        <PanelSection title="More">
+        <PanelSection title="更多">
             <PanelSectionRow>
                 <ButtonItem
                     layout="below"

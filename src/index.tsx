@@ -6,6 +6,7 @@ import {
 import { VFC } from "react";
 import { FaShip } from "react-icons/fa";
 import { AdvanceComponent, MoreComponent, SwitchComponent } from "./components";
+import { PluginManager } from "./backend";
 
 const Content: VFC<{}> = () => {
 
@@ -19,12 +20,14 @@ const Content: VFC<{}> = () => {
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
+  PluginManager.register(serverApi);
 
   return {
     title: <div className={staticClasses.Title}>SK Box</div>,
     content: <Content />,
     icon: <FaShip />,
     onDismount() {
+      PluginManager.unregister();
     },
   };
 });

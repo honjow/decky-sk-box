@@ -4,7 +4,7 @@ import { Settings } from "../backend";
 
 export const useUpdate = () => {
   const [currentVersion, setCurrentVersion] = useState<string>(Settings.currentVersion);
-  const [latestVersion, setLatestVersion] = useState<string>(Settings.currentVersion);
+  const [latestVersion, setLatestVersion] = useState<string>(Settings.latestVersion);
 
   useEffect(() => {
     const getData = async () => {

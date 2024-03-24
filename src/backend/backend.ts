@@ -6,8 +6,6 @@ export class Backend {
     this.serverAPI = serverAPI;
   }
 
-
-
   public static async updateLatest() {
     return await this.serverAPI!.callPluginMethod("update_latest", {});
   }
@@ -21,5 +19,4 @@ export class Backend {
     return (await this.serverAPI!.callPluginMethod("get_latest_version", {}))
       .result as string;
   }
-
 }
