@@ -19,4 +19,86 @@ export class Backend {
     return (await this.serverAPI!.callPluginMethod("get_latest_version", {}))
       .result as string;
   }
+
+  // get_usb_wakeup_enabled
+  public static async getUsbWakeupEnabled(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_usb_wakeup_enabled", {})
+    ).result as boolean;
+  }
+
+  // set_usb_wakeup
+  public static async setUsbWakeup(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_usb_wakeup", {
+      enabled: value,
+    });
+  }
+
+  // get_handycon_enabled
+  public static async getHandyConEnabled(): Promise<boolean> {
+    return (await this.serverAPI!.callPluginMethod("get_handycon_enabled", {}))
+      .result as boolean;
+  }
+
+  // set_handycon_enabled
+  public static async setHandyConEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_handycon_enabled", {
+      enabled: value,
+    });
+  }
+
+  // get_hhd_enabled
+  public static async getHhdEnabled(): Promise<boolean> {
+    return (await this.serverAPI!.callPluginMethod("get_hhd_enabled", {}))
+      .result as boolean;
+  }
+
+  // set_hhd_enabled
+  public static async setHhdEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_hhd_enabled", {
+      enabled: value,
+    });
+  }
+
+  // get_auto_keep_boot_enabled
+  public static async getAutoKeepBootEnabled(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_auto_keep_boot_enabled", {})
+    ).result as boolean;
+  }
+
+  // set_auto_keep_boot_enabled
+  public static async setAutoKeepBootEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod(
+      "set_auto_keep_boot_enabled",
+      { enabled: value }
+    );
+  }
+
+  // get_hibernate_enabled
+  public static async getHibernateEnabled(): Promise<boolean> {
+    return (await this.serverAPI!.callPluginMethod("get_hibernate_enabled", {}))
+      .result as boolean;
+  }
+
+  // set_hibernate_enabled
+  public static async setHibernateEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_hibernate_enabled", {
+      enabled: value,
+    });
+  }
+
+  // firmware_override_enabled
+  public static async getFirmwareOverrideEnabled(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("firmware_override_enabled", {})
+    ).result as boolean;
+  }
+
+  // set_firmware_override
+  public static async setFirmwareOverride(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_firmware_override", {
+      enabled: value,
+    });
+  }
 }

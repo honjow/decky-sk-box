@@ -1,5 +1,9 @@
 import logging
 
+import decky_plugin
+
+SK_TOOL_PATH = "/usr/share/sk-chos-tool"
+SK_TOOL_SCRIPTS_PATH = f"{SK_TOOL_PATH}/scripts"
 
 try:
     LOG_LOCATION = f"/tmp/SK-Box.log"
@@ -20,3 +24,5 @@ try:
 except Exception as e:
     logging.error(f"exception|{e}")
     PRODUCT_NAME = "UNKNOWN"
+
+USER = decky_plugin.DECKY_USER
