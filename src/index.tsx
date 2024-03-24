@@ -5,7 +5,7 @@ import {
 } from "decky-frontend-lib";
 import { VFC } from "react";
 import { FaShip } from "react-icons/fa";
-import { AdvanceComponent, MoreComponent, SwitchComponent } from "./components";
+import { AdvanceComponent, AutoUpdateComponent, MoreComponent, SwitchComponent } from "./components";
 import { PluginManager } from "./backend";
 
 const Content: VFC<{}> = () => {
@@ -14,6 +14,7 @@ const Content: VFC<{}> = () => {
     <>
       <SwitchComponent />
       <AdvanceComponent />
+      <AutoUpdateComponent />
       <MoreComponent />
     </>
   );

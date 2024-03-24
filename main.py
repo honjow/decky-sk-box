@@ -93,6 +93,56 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error setting Firmware Override enabled: {e}")
             return False
+        
+    async def get_enable_auto_update(self):
+        return utils.check_service_autostart("sk-chos-tool-autoupdate.timer");
+
+    async def set_enable_auto_update(self, enabled: bool):
+        try:
+            utils.toggle_service("sk-chos-tool-autoupdate.timer", enabled)
+            return True
+        except Exception as e:
+            logging.error(f"Error setting Auto Update enabled: {e}")
+            return False
+        
+    async def get_skt_update_enabled(self):
+        skt_key = "sk_chos_tool"
+        return utils.get_autoupdate(skt_key)
+    
+    async def set_skt_update_enabled(self, enabled: bool):
+        skt_key = "sk_chos_tool"
+        try:
+            utils.set_autoupdate(skt_key, enabled)
+            return True
+        except Exception as e:
+            logging.error(f"Error setting SKT Update enabled: {e}")
+            return False
+        
+    async def get_handy_update_enabled(self):
+        handy_key = "handygccs"
+        return utils.get_autoupdate(handy_key)
+    
+    async def set_handy_update_enabled(self, enabled: bool):
+        handy_key = "handygccs"
+        try:
+            utils.set_autoupdate(handy_key, enabled)
+            return True
+        except Exception as e:
+            logging.error(f"Error setting Handy Update enabled: {e}")
+            return False
+        
+    async def get_hhd_update_enabled(self):
+        hhd_key = "hhd"
+        return utils.get_autoupdate(hhd_key)
+    
+    async def set_hhd_update_enabled(self, enabled: bool):
+        hhd_key = "hhd"
+        try:
+            utils.set_autoupdate(hhd_key, enabled)
+            return True
+        except Exception as e:
+            logging.error(f"Error setting HHD Update enabled: {e}")
+            return False
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):

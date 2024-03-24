@@ -5,6 +5,7 @@ export class Settings {
 
   private _showSwitch: boolean = false;
   private _showAdvance: boolean = false;
+  private _showAutoUpdate: boolean = false;
 
   private _enableKeepBoot: boolean = true;
   private _enableHHD: boolean = true;
@@ -12,6 +13,11 @@ export class Settings {
   private _enableUSBWakeup: boolean = false;
   private _enableHibernate: boolean = false;
   private _enableFirmwareOverride: boolean = false;
+
+  private _enableAutoUpdate: boolean = true;
+  private _enableAutoUpdateHandyGCCS: boolean = true;
+  private _enableAutoUpdateHHD: boolean = true;
+  private _enableAutoUpdateSkChosTool: boolean = true;
 
   private _currentVersion: string = "";
   private _latestVersion: string = "";
@@ -49,6 +55,22 @@ export class Settings {
 
     Backend.getAutoKeepBootEnabled().then((value) => {
       this._instance._enableKeepBoot = value;
+    });
+
+    Backend.getEnableAutoUpdate().then((value) => {
+      this._instance._enableAutoUpdate = value;
+    });
+
+    Backend.getHandyUpdateEnabled().then((value) => {
+      this._instance._enableAutoUpdateHandyGCCS = value;
+    });
+
+    Backend.getHhdUpdateEnabled().then((value) => {
+      this._instance._enableAutoUpdateHHD = value;
+    });
+
+    Backend.getSktUpdateEnabled().then((value) => {
+      this._instance._enableAutoUpdateSkChosTool = value;
     });
   }
 
@@ -130,6 +152,46 @@ export class Settings {
 
   public static set enableFirmwareOverride(value: boolean) {
     this._instance._enableFirmwareOverride = value;
+  }
+
+  public static get enableAutoUpdate(): boolean {
+    return this._instance._enableAutoUpdate;
+  }
+
+  public static set enableAutoUpdate(value: boolean) {
+    this._instance._enableAutoUpdate = value;
+  }
+
+  public static get enableAutoUpdateHandyGCCS(): boolean {
+    return this._instance._enableAutoUpdateHandyGCCS;
+  }
+
+  public static set enableAutoUpdateHandyGCCS(value: boolean) {
+    this._instance._enableAutoUpdateHandyGCCS = value;
+  }
+
+  public static get enableAutoUpdateHHD(): boolean {
+    return this._instance._enableAutoUpdateHHD;
+  }
+
+  public static set enableAutoUpdateHHD(value: boolean) {
+    this._instance._enableAutoUpdateHHD = value;
+  }
+
+  public static get enableAutoUpdateSkChosTool(): boolean {
+    return this._instance._enableAutoUpdateSkChosTool;
+  }
+
+  public static set enableAutoUpdateSkChosTool(value: boolean) {
+    this._instance._enableAutoUpdateSkChosTool = value;
+  }
+
+  public static get showAutoUpdate(): boolean {
+    return this._instance._showAutoUpdate;
+  }
+
+  public static set showAutoUpdate(value: boolean) {
+    this._instance._showAutoUpdate = value;
   }
 
 }

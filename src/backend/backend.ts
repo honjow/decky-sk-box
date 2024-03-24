@@ -101,4 +101,60 @@ export class Backend {
       enabled: value,
     });
   }
+
+  // get_enable_auto_update
+  public static async getEnableAutoUpdate(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_enable_auto_update", {})
+    ).result as boolean;
+  }
+
+  // set_enable_auto_update
+  public static async setEnableAutoUpdate(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_enable_auto_update", {
+      enabled: value,
+    });
+  }
+
+  // get_skt_update_enabled
+  public static async getSktUpdateEnabled(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_skt_update_enabled", {})
+    ).result as boolean;
+  }
+
+  // set_skt_update_enabled
+  public static async setSktUpdateEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_skt_update_enabled", {
+      enabled: value,
+    });
+  }
+
+  // get_handy_update_enabled
+  public static async getHandyUpdateEnabled(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_handy_update_enabled", {})
+    ).result as boolean;
+  }
+
+  // set_handy_update_enabled
+  public static async setHandyUpdateEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_handy_update_enabled", {
+      enabled: value,
+    });
+  }
+
+  // get_hhd_update_enabled
+  public static async getHhdUpdateEnabled(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_hhd_update_enabled", {})
+    ).result as boolean;
+  }
+
+  // set_hhd_update_enabled
+  public static async setHhdUpdateEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_hhd_update_enabled", {
+      enabled: value,
+    });
+  }
 }
