@@ -25,7 +25,7 @@ export const AutoUpdateComponent: VFC = () => {
   } = useAutoUpdate();
 
   useEffect(() => {
-    Settings.showSwitch = showAutoUpdate;
+    Settings.showAutoUpdate = showAutoUpdate;
   }, [showAutoUpdate]);
 
   return (

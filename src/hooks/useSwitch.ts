@@ -53,34 +53,34 @@ export const useSwitch = () => {
   const updateKeepBoot = async (value: boolean) => {
     await Backend.setAutoKeepBootEnabled(value);
     Settings.enableKeepBoot = value;
-  }
+  };
 
   const updateHHD = async (value: boolean) => {
+    setEnableHandyCon(false);
     await Backend.setHhdEnabled(value);
     Settings.enableHHD = value;
-    setEnableHandyCon(false);
-  }
+  };
 
   const updateHandyCon = async (value: boolean) => {
+    setEnableHHD(false);
     await Backend.setHandyConEnabled(value);
     Settings.enableHandyCon = value;
-    setEnableHHD(false);
-  }
+  };
 
   const updateUSBWakeup = async (value: boolean) => {
     await Backend.setUsbWakeup(value);
     Settings.enableUSBWakeup = value;
-  }
+  };
 
   const updateHibernate = async (value: boolean) => {
     await Backend.setHibernateEnabled(value);
     Settings.enableHibernate = value;
-  }
+  };
 
   const updateFirmwareOverride = async (value: boolean) => {
     await Backend.setFirmwareOverride(value);
     Settings.enableFirmwareOverride = value;
-  }
+  };
 
   return {
     enableKeepBoot,

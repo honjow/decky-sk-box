@@ -8,6 +8,7 @@ from settings import SettingsManager
 from config import (
     logging,
     USER,
+    CONFIG_KEY,
 )
 
 
@@ -16,6 +17,14 @@ class Plugin:
         self.settings = SettingsManager(
             name="config", settings_directory=decky_plugin.DECKY_PLUGIN_SETTINGS_DIR
         )
+    
+    async def get_settings(self):
+        return self.settings.getSetting(CONFIG_KEY)
+    
+    async def set_settings(self, settings):
+        self.settings.setSetting(CONFIG_KEY, settings)
+        logging.info(f"save Settings: {settings}")
+        return True
 
     async def update_latest(self):
         logging.info("Updating latest")

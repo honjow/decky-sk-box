@@ -1,11 +1,43 @@
 import { Backend } from ".";
 
+export class SettingsData {
+  public showSwitch: boolean;
+  public showAdvance: boolean;
+  public showAutoUpdate: boolean;
+
+  public constructor() {
+    this.showSwitch = false;
+    this.showAdvance = false;
+    this.showAutoUpdate = false;
+  }
+
+  public deepCopy(settingsData: SettingsData): SettingsData {
+    this.showSwitch = settingsData.showSwitch;
+    this.showAdvance = settingsData.showAdvance;
+    this.showAutoUpdate = settingsData.showAutoUpdate;
+    return this;
+  }
+
+  public copyWith(
+    showSwitch?: boolean,
+    showAdvance?: boolean,
+    showAutoUpdate?: boolean
+  ): SettingsData {
+    if (showSwitch !== undefined) this.showSwitch = showSwitch;
+    if (showAdvance !== undefined) this.showAdvance = showAdvance;
+    if (showAutoUpdate !== undefined) this.showAutoUpdate = showAutoUpdate;
+    return this;
+  }
+}
+
 export class Settings {
   private static _instance: Settings = new Settings();
 
-  private _showSwitch: boolean = false;
-  private _showAdvance: boolean = false;
-  private _showAutoUpdate: boolean = false;
+  private _settingsData: SettingsData;
+
+  // private _showSwitch: boolean = false;
+  // private _showAdvance: boolean = false;
+  // private _showAutoUpdate: boolean = false;
 
   private _enableKeepBoot: boolean = true;
   private _enableHHD: boolean = true;
@@ -24,9 +56,28 @@ export class Settings {
   private _currentVersion: string = "";
   private _latestVersion: string = "";
 
-  private constructor() {}
+  private constructor() {
+    this._settingsData = new SettingsData();
+  }
+
+  private static get settingsData(): SettingsData {
+    return this._instance._settingsData;
+  }
+
+  public static async loadSettingsData() {
+    const _settingsData = await Backend.getSettings();
+    console.log(`SettingsData: ${JSON.stringify(_settingsData)}`);
+    this.settingsData.deepCopy(_settingsData);
+  }
+
+  public static async saveSettingsData() {
+    console.log(`SettingsData save: ${JSON.stringify(this.settingsData)}`);
+    await Backend.setSettings(this.settingsData);
+  }
 
   public static async init() {
+    await this.loadSettingsData();
+
     Backend.getVersion().then((value) => {
       this._instance._currentVersion = value;
     });
@@ -85,19 +136,30 @@ export class Settings {
   }
 
   public static get showSwitch(): boolean {
-    return this._instance._showSwitch;
+    return this.settingsData.showSwitch;
   }
 
   public static set showSwitch(value: boolean) {
-    this._instance._showSwitch = value;
+    this.settingsData.showSwitch = value;
+    this.saveSettingsData();
   }
 
   public static get showAdvance(): boolean {
-    return this._instance._showAdvance;
+    return this.settingsData.showAdvance;
   }
 
   public static set showAdvance(value: boolean) {
-    this._instance._showAdvance = value;
+    this.settingsData.showAdvance = value;
+    this.saveSettingsData();
+  }
+
+  public static get showAutoUpdate(): boolean {
+    return this.settingsData.showAutoUpdate;
+  }
+
+  public static set showAutoUpdate(value: boolean) {
+    this.settingsData.showAutoUpdate = value;
+    this.saveSettingsData();
   }
 
   public static get currentVersion(): string {
@@ -195,13 +257,4 @@ export class Settings {
   public static set enableAutoUpdateSkChosTool(value: boolean) {
     this._instance._enableAutoUpdateSkChosTool = value;
   }
-
-  public static get showAutoUpdate(): boolean {
-    return this._instance._showAutoUpdate;
-  }
-
-  public static set showAutoUpdate(value: boolean) {
-    this._instance._showAutoUpdate = value;
-  }
-
 }

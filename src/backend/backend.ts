@@ -1,4 +1,5 @@
 import { ServerAPI } from "decky-frontend-lib";
+import { SettingsData } from ".";
 
 export class Backend {
   private static serverAPI: ServerAPI;
@@ -190,5 +191,21 @@ export class Backend {
   // reset_gnome
   public static async resetGnome() {
     return await this.serverAPI!.callPluginMethod("reset_gnome", {});
+  }
+
+  // get_settings
+  public static async getSettings(): Promise<SettingsData> {
+    const res = await this.serverAPI!.callPluginMethod("get_settings", {});
+    if (!res.success) {
+      return new SettingsData();
+    }
+    return res.result as SettingsData;
+  }
+
+  // set_settings
+  public static async setSettings(settings: SettingsData) {
+    return await this.serverAPI!.callPluginMethod("set_settings", {
+      settings: settings,
+    });
   }
 }

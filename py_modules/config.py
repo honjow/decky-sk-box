@@ -26,3 +26,5 @@ except Exception as e:
     PRODUCT_NAME = "UNKNOWN"
 
 USER = decky_plugin.DECKY_USER
+
+CONFIG_KEY = "sk-box"
