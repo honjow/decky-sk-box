@@ -203,6 +203,13 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error resetting gnome: {e}")
             return False
+        
+    async def get_package_version(self, package_name):
+        try:
+            return utils.get_package_version(package_name)
+        except Exception as e:
+            logging.error(f"Error getting package version: {e}")
+            return ""
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):

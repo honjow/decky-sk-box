@@ -4,7 +4,7 @@ import { Backend } from "../backend";
 import { useUpdate } from "../hooks";
 
 export const MoreComponent: VFC = () => {
-    const { currentVersion, latestVersion } = useUpdate();
+    const { currentVersion, latestVersion, addonVersion, sktVersion } = useUpdate();
 
     let uptButtonText = "重新安装插件";
 
@@ -34,6 +34,21 @@ export const MoreComponent: VFC = () => {
                     </Field>
                 </PanelSectionRow>
             )}
+            {Boolean(sktVersion) && (
+                <PanelSectionRow>
+                    <Field focusable label={"SK Chos Tool 版本"}>
+                        {sktVersion}
+                    </Field>
+                </PanelSectionRow>
+            )}
+            {Boolean(addonVersion) && (
+                <PanelSectionRow>
+                    <Field focusable label={"SK Chos Addon 版本"}>
+                        {addonVersion}
+                    </Field>
+                </PanelSectionRow>
+            )}
+
         </PanelSection>
     )
 }

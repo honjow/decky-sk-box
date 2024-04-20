@@ -56,6 +56,9 @@ export class Settings {
   private _currentVersion: string = "";
   private _latestVersion: string = "";
 
+  private _addonVersion: string = "";
+  private _sktVersion: string = "";
+
   private constructor() {
     this._settingsData = new SettingsData();
   }
@@ -84,6 +87,14 @@ export class Settings {
 
     Backend.getLatestVersion().then((value) => {
       this._instance._latestVersion = value;
+    });
+
+    Backend.getPackageVersion("sk-chos-addon").then((value) => {
+      this._instance._addonVersion = value;
+    });
+
+    Backend.getPackageVersion("sk-chos-tool").then((value) => {
+      this._instance._sktVersion = value;
     });
 
     Backend.getUsbWakeupEnabled().then((value) => {
@@ -256,5 +267,21 @@ export class Settings {
 
   public static set enableAutoUpdateSkChosTool(value: boolean) {
     this._instance._enableAutoUpdateSkChosTool = value;
+  }
+
+  public static get addonVersion(): string {
+    return this._instance._addonVersion;
+  }
+
+  public static set addonVersion(value: string) {
+    this._instance._addonVersion = value;
+  }
+
+  public static get sktVersion(): string {
+    return this._instance._sktVersion;
+  }
+
+  public static set sktVersion(value: string) {
+    this._instance._sktVersion = value;
   }
 }

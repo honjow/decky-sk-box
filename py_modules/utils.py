@@ -61,15 +61,24 @@ def get_package_version(package_name):
     try:
         # 运行pacman命令并捕获输出
         result = subprocess.run(
-            ["pacman", "-Q", package_name], capture_output=True, text=True, check=True
+            f"sudo pacman -Q {package_name}",
+            shell=True,
+            text=True,
+            check=True,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
         )
 
         # 获取输出中的版本号部分
         version = result.stdout.strip().split(" ")[1]
 
         return version
-    except subprocess.CalledProcessError:
-        return f"Error: Package '{package_name}' not found"
+    except subprocess.CalledProcessError as e:
+        # return f"Error: Package '{package_name}' not found"
+        logging.error(
+            f"获取包版本失败: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
+        )
+        return ""
 
 
 # 检查服务是否已启用
@@ -152,6 +161,7 @@ def chk_hibernate():
         return False
 
     return False
+
 
 def set_hibernate(enabled):
     old_file = "/etc/systemd/sleep.conf.d/sleep.conf"
@@ -266,7 +276,7 @@ def chk_firmware_override():
                     return True
     except FileNotFoundError:
         return False
-    
+
 
 def set_firmware_override(enable):
     if enable:
@@ -288,6 +298,7 @@ def chk_usb_wakeup():
     except FileNotFoundError:
         return False
 
+
 def set_usb_wakeup(enable):
     conf_path = "/etc/device-quirks/device-quirks.conf"
     enable_str = "USB_WAKE_ENABLED=1"
@@ -300,6 +311,7 @@ def set_usb_wakeup(enable):
         run_command(f"sudo sed -i 's/{enable_str}/{disable_str}/g' {conf_path}")
     run_command("sudo frzr-tweaks")
     logging.info("USB唤醒设置完成")
+
 
 def get_config_value(filename, section, key):
     config = configparser.ConfigParser()

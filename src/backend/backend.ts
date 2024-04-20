@@ -208,4 +208,13 @@ export class Backend {
       settings: settings,
     });
   }
+
+  // get_package_version
+  public static async getPackageVersion(packageName: string): Promise<string> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_package_version", {
+        package_name: packageName,
+      })
+    ).result as string;
+  }
 }

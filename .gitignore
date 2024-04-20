@@ -57,3 +57,5 @@ cli/*
 cli/decky
 
 Makefile
+
+.history
