@@ -89,6 +89,7 @@ def check_service_autostart(service_name):
             .decode()
             .strip()
         )
+        logging.info(f"检查服务 {service_name} 是否已启用: {output}")
         return output == "enabled"
     except subprocess.CalledProcessError:
         # 如果命令执行出错，则服务可能不存在或无法访问

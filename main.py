@@ -23,7 +23,7 @@ class Plugin:
     
     async def set_settings(self, settings):
         self.settings.setSetting(CONFIG_KEY, settings)
-        logging.info(f"save Settings: {settings}")
+        logging.log(f"save Settings: {settings}")
         return True
 
     async def update_latest(self):
@@ -51,7 +51,8 @@ class Plugin:
 
     async def set_handycon_enabled(self, enabled: bool):
         try:
-            utils.toggle_service(f"hhd@{USER}.service", not enabled)
+            if enabled:
+                utils.toggle_service(f"hhd@{USER}.service", not enabled)
             utils.toggle_service("handycon.service", enabled)
             return True
         except Exception as e:
@@ -63,7 +64,8 @@ class Plugin:
 
     async def set_hhd_enabled(self, enabled: bool):
         try:
-            utils.toggle_service("handycon.service", not enabled)
+            if enabled:
+                utils.toggle_service("handycon.service", not enabled)
             utils.toggle_service(f"hhd@{USER}.service", enabled)
             return True
         except Exception as e:

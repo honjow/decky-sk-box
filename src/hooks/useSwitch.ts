@@ -33,7 +33,7 @@ export const useSwitch = () => {
   useEffect(() => {
     const getDate = async () => {
       const _enableKeepBoot = await Backend.getAutoKeepBootEnabled();
-      const _enableHHD = await Backend.getHhdEnabled();
+      const _enableHHD = await Backend.getHHDEnabled();
       const _enableHandyCon = await Backend.getHandyConEnabled();
       const _enableUSBWakeup = await Backend.getUsbWakeupEnabled();
       const _enableHibernate = await Backend.getHibernateEnabled();
@@ -50,36 +50,46 @@ export const useSwitch = () => {
     getDate();
   }, []);
 
-  const updateKeepBoot = async (value: boolean) => {
-    await Backend.setAutoKeepBootEnabled(value);
-    Settings.enableKeepBoot = value;
+  const updateKeepBoot = async (enable: boolean) => {
+    await Backend.setAutoKeepBootEnabled(enable);
+    Settings.enableKeepBoot = enable;
+    setEnableKeepBoot(enable);
   };
 
-  const updateHHD = async (value: boolean) => {
-    setEnableHandyCon(false);
-    await Backend.setHhdEnabled(value);
-    Settings.enableHHD = value;
+  const updateHHD = async (enable: boolean) => {
+    if (enable === true) {
+      setEnableHandyCon(false);
+    }
+    await Backend.setHHDEnabled(enable);
+    Settings.enableHHD = enable;
+    setEnableHHD(enable);
   };
 
-  const updateHandyCon = async (value: boolean) => {
-    setEnableHHD(false);
-    await Backend.setHandyConEnabled(value);
-    Settings.enableHandyCon = value;
+  const updateHandyCon = async (enable: boolean) => {
+    if (enable === true) {
+      setEnableHHD(false);
+    }
+    await Backend.setHandyConEnabled(enable);
+    Settings.enableHandyCon = enable;
+    setEnableHandyCon(enable);
   };
 
-  const updateUSBWakeup = async (value: boolean) => {
-    await Backend.setUsbWakeup(value);
-    Settings.enableUSBWakeup = value;
+  const updateUSBWakeup = async (enable: boolean) => {
+    await Backend.setUsbWakeup(enable);
+    Settings.enableUSBWakeup = enable;
+    setEnableUSBWakeup(enable);
   };
 
-  const updateHibernate = async (value: boolean) => {
-    await Backend.setHibernateEnabled(value);
-    Settings.enableHibernate = value;
+  const updateHibernate = async (enable: boolean) => {
+    await Backend.setHibernateEnabled(enable);
+    Settings.enableHibernate = enable;
+    setEnableHibernate(enable);
   };
 
-  const updateFirmwareOverride = async (value: boolean) => {
-    await Backend.setFirmwareOverride(value);
-    Settings.enableFirmwareOverride = value;
+  const updateFirmwareOverride = async (enable: boolean) => {
+    await Backend.setFirmwareOverride(enable);
+    Settings.enableFirmwareOverride = enable;
+    setEnableFirmwareOverride(enable);
   };
 
   return {

@@ -39,17 +39,17 @@ export class Settings {
   // private _showAdvance: boolean = false;
   // private _showAutoUpdate: boolean = false;
 
-  private _enableKeepBoot: boolean = true;
-  private _enableHHD: boolean = true;
+  private _enableKeepBoot: boolean = false;
+  private _enableHHD: boolean = false;
   private _enableHandyCon: boolean = false;
   private _enableUSBWakeup: boolean = false;
   private _enableHibernate: boolean = false;
   private _enableFirmwareOverride: boolean = false;
 
-  private _enableAutoUpdate: boolean = true;
-  private _enableAutoUpdateHandyGCCS: boolean = true;
-  private _enableAutoUpdateHHD: boolean = true;
-  private _enableAutoUpdateSkChosTool: boolean = true;
+  private _enableAutoUpdate: boolean = false;
+  private _enableAutoUpdateHandyGCCS: boolean = false;
+  private _enableAutoUpdateHHD: boolean = false;
+  private _enableAutoUpdateSkChosTool: boolean = false;
 
   private _swapfileMaking: boolean = false;
 
@@ -105,7 +105,7 @@ export class Settings {
       this._instance._enableHandyCon = value;
     });
 
-    Backend.getHhdEnabled().then((value) => {
+    Backend.getHHDEnabled().then((value) => {
       this._instance._enableHHD = value;
     });
 

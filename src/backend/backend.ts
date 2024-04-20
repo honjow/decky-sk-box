@@ -53,13 +53,13 @@ export class Backend {
   }
 
   // get_hhd_enabled
-  public static async getHhdEnabled(): Promise<boolean> {
+  public static async getHHDEnabled(): Promise<boolean> {
     return (await this.serverAPI!.callPluginMethod("get_hhd_enabled", {}))
       .result as boolean;
   }
 
   // set_hhd_enabled
-  public static async setHhdEnabled(value: boolean) {
+  public static async setHHDEnabled(value: boolean) {
     return await this.serverAPI!.callPluginMethod("set_hhd_enabled", {
       enabled: value,
     });
