@@ -53,6 +53,8 @@ export class Settings {
 
   private _swapfileMaking: boolean = false;
 
+  private _showBootToWindows: boolean = false;
+
   private _currentVersion: string = "";
   private _latestVersion: string = "";
 
@@ -135,6 +137,12 @@ export class Settings {
 
     Backend.getSktUpdateEnabled().then((value) => {
       this._instance._enableAutoUpdateSkChosTool = value;
+    });
+
+    Backend.getWinBootEntry().then((value) => {
+      if (Boolean(value)) {
+        this._instance._showBootToWindows = true;
+      }
     });
   }
 
@@ -283,5 +291,13 @@ export class Settings {
 
   public static set sktVersion(value: string) {
     this._instance._sktVersion = value;
+  }
+
+  public static get showBootToWindows(): boolean {
+    return this._instance._showBootToWindows;
+  }
+
+  public static set showBootToWindows(value: boolean) {
+    this._instance._showBootToWindows = value;
   }
 }

@@ -5,13 +5,20 @@ import {
 } from "decky-frontend-lib";
 import { VFC } from "react";
 import { FaDemocrat } from "react-icons/fa";
-import { AdvanceComponent, AutoUpdateComponent, MoreComponent, SwitchComponent } from "./components";
+import {
+  AdvanceComponent,
+  AutoUpdateComponent,
+  MoreComponent,
+  SwitchComponent,
+  ToolComponent,
+} from "./components";
 import { PluginManager } from "./backend";
 
 const Content: VFC<{}> = () => {
 
   return (
     <>
+      <ToolComponent />
       <SwitchComponent />
       <AdvanceComponent />
       <AutoUpdateComponent />

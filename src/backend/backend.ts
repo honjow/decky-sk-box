@@ -217,4 +217,16 @@ export class Backend {
       })
     ).result as string;
   }
+
+  // get_win_boot
+  public static async getWinBootEntry(): Promise<string> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_win_boot", {})
+    ).result as string;
+  }
+
+  // boot_to_win
+  public static async bootToWindows() {
+    return await this.serverAPI!.callPluginMethod("boot_to_win", {});
+  }
 }

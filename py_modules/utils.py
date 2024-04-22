@@ -252,19 +252,6 @@ def reset_gnome():
     return success, ret_msg
 
 
-def is_sk_holo2():
-    file_path = "/etc/sk-holo/version"
-    if not os.path.isfile(file_path):
-        return False
-    try:
-        with open(file_path, "r") as file:
-            content = file.readline().strip()
-            if "2" == content:
-                return True
-    except FileNotFoundError:
-        return False
-
-
 def chk_firmware_override():
     file_path = "/etc/device-quirks/device-quirks.conf"
     if not os.path.isfile(file_path):

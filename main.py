@@ -4,6 +4,7 @@ import os
 import decky_plugin
 import update
 import utils
+import boot_to_win
 from settings import SettingsManager
 from config import (
     logging,
@@ -212,6 +213,20 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error getting package version: {e}")
             return ""
+        
+    async def get_win_boot(self):
+        try:
+            return boot_to_win.get_win_boot()
+        except Exception as e:
+            logging.error(f"Error getting windows boot: {e}")
+            return ""
+        
+    async def boot_to_win(self):
+        try:
+            return boot_to_win.boot_to_win()
+        except Exception as e:
+            logging.error(f"Error booting to windows: {e}")
+            return False
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):
