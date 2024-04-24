@@ -5,6 +5,7 @@ import decky_plugin
 import update
 import utils
 import boot_to_win
+import mount
 from settings import SettingsManager
 from config import (
     logging,
@@ -227,6 +228,13 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error booting to windows: {e}")
             return False
+    
+    async def get_mountpoint(self):
+        try:
+            return mount.get_mountpoint()
+        except Exception as e:
+            logging.error(f"Error getting mountpoint: {e}")
+            return ""
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):
