@@ -1,5 +1,53 @@
+import os
 from config import logging
+import urllib.parse
 import subprocess
+import decky_plugin
+
+
+def urlencode(arg):
+    return urllib.parse.quote(arg, safe="")
+
+
+def send_to_steamcmd(steam_command: str, arg: str):
+    user_home = decky_plugin.DECKY_USER_HOME
+    try:
+        encoded = urlencode(arg)
+        steam_running = (
+            subprocess.run(
+                ["pgrep", "-x", "steam"], stdout=subprocess.DEVNULL
+            ).returncode
+            == 0
+        )
+        if steam_running:
+            shell_command = f"systemd-run -M 1000@ --user --collect --wait sh -c './.steam/root/ubuntu12_32/steam steam://{steam_command}/{encoded}'"
+            subprocess.run(
+                shell_command,
+                check=True,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+                executable="/bin/bash",
+            )
+            logging.info(
+                f"Sent URL to steam: steam://{steam_command}/{arg} (steam://{steam_command}/{encoded})"
+            )
+        else:
+            logging.error("Steam is not running")
+            return False
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error(
+            f"Error sending to steamcmd: {e}, stdout: {e.stdout}, stderr: {e.stderr}, cmd: {e.cmd}"
+        )
+        return False
+    except Exception as e:
+        logging.error(f"> Error sending to steamcmd: {e}")
+        import traceback
+
+        logging.error(traceback.format_exc())
+        return False
 
 
 def get_mountpoint():
@@ -53,3 +101,12 @@ done
     except subprocess.CalledProcessError as e:
         logging.error(f"Error getting mountpoint: {e}, {e.stderr}")
         return []
+
+
+def add_library_folder(mountpoint: str):
+    libraryfolder = os.path.join(mountpoint, "SteamLibrary")
+    if not os.path.exists(libraryfolder):
+        # create folder
+        os.makedirs(libraryfolder, exist_ok=True)
+    logging.info(f"Adding library folder: {libraryfolder}")
+    return send_to_steamcmd("addlibraryfolder", libraryfolder)

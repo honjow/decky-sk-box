@@ -244,4 +244,18 @@ export class Backend {
     }
     return result.result as MotionPoint[];
   }
+
+  // add_library_folder
+  public static async addLibraryFolder(mountpoint: string): Promise<boolean> {
+    const result = await this.serverAPI!.callPluginMethod(
+      "add_library_folder",
+      {
+        mountpoint: mountpoint,
+      }
+    );
+    if (!result.success) {
+      return false;
+    }
+    return result.result as boolean;
+  }
 }

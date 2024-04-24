@@ -5,7 +5,7 @@ import decky_plugin
 import update
 import utils
 import boot_to_win
-import mount
+import steam_util
 from settings import SettingsManager
 from config import (
     logging,
@@ -231,10 +231,21 @@ class Plugin:
     
     async def get_mountpoint(self):
         try:
-            return mount.get_mountpoint()
+            return steam_util.get_mountpoint()
         except Exception as e:
             logging.error(f"Error getting mountpoint: {e}")
             return ""
+        
+    async def add_library_folder(self, mountpoint: str):
+        logging.info(f"Adding library folder: {mountpoint}")
+        try:
+            return steam_util.add_library_folder(mountpoint)
+        except Exception as e:
+            logging.error(f"Error adding library folder: {e}")
+            # 堆栈跟踪
+            import traceback
+            logging.error(traceback.format_exc())
+            return False
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):
