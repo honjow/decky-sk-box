@@ -1,6 +1,13 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { SettingsData } from ".";
 
+export interface MotionPoint {
+  path: string;
+  mountpoint: string;
+  fstype: string;
+  fssize: string;
+}
+
 export class Backend {
   private static serverAPI: ServerAPI;
   public static async init(serverAPI: ServerAPI) {
@@ -220,13 +227,35 @@ export class Backend {
 
   // get_win_boot
   public static async getWinBootEntry(): Promise<string> {
-    return (
-      await this.serverAPI!.callPluginMethod("get_win_boot", {})
-    ).result as string;
+    return (await this.serverAPI!.callPluginMethod("get_win_boot", {}))
+      .result as string;
   }
 
   // boot_to_win
   public static async bootToWindows() {
     return await this.serverAPI!.callPluginMethod("boot_to_win", {});
+  }
+
+  // get_mountpoint
+  public static async getMountpoint(): Promise<MotionPoint[]> {
+    const result = await this.serverAPI!.callPluginMethod("get_mountpoint", {});
+    if (!result.success) {
+      return [];
+    }
+    return result.result as MotionPoint[];
+  }
+
+  // add_library_folder
+  public static async addLibraryFolder(mountpoint: string): Promise<boolean> {
+    const result = await this.serverAPI!.callPluginMethod(
+      "add_library_folder",
+      {
+        mountpoint: mountpoint,
+      }
+    );
+    if (!result.success) {
+      return false;
+    }
+    return result.result as boolean;
   }
 }
