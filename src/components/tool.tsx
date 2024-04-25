@@ -94,23 +94,28 @@ export const MountpointInfiModel: VFC<MountpointInfiModelProps> = ({ mountpoint,
       <div>
         <PanelSection title={"挂载点信息"}>
           <PanelSectionRow>
-            <Field focusable label={"挂载点"}>
+            <Field label={"挂载点"}>
               {mountpoint.mountpoint}
             </Field>
           </PanelSectionRow>
           <PanelSectionRow>
-            <Field focusable label={"设备"}>
+            <Field label={"设备"}>
               {mountpoint.path}
             </Field>
           </PanelSectionRow>
           <PanelSectionRow>
-            <Field focusable label={"文件系统"}>
+            <Field label={"文件系统"}>
               {mountpoint.fstype}
             </Field>
           </PanelSectionRow>
           <PanelSectionRow>
-            <Field focusable label={"容量"}>
+            <Field label={"分区空间"}>
               {mountpoint.fssize}
+            </Field>
+          </PanelSectionRow>
+          <PanelSectionRow>
+            <Field label={"可用空间"}>
+              {mountpoint.fsvail}
             </Field>
           </PanelSectionRow>
         </PanelSection>

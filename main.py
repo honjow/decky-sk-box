@@ -234,6 +234,8 @@ class Plugin:
             return steam_util.get_mountpoint()
         except Exception as e:
             logging.error(f"Error getting mountpoint: {e}")
+            import traceback
+            logging.error(traceback.format_exc())
             return ""
         
     async def add_library_folder(self, mountpoint: str):

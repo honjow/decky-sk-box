@@ -6,6 +6,7 @@ export interface MotionPoint {
   mountpoint: string;
   fstype: string;
   fssize: string;
+  fsvail: string;
 }
 
 export class Backend {
@@ -242,7 +243,17 @@ export class Backend {
     if (!result.success) {
       return [];
     }
-    return result.result as MotionPoint[];
+    const data = result.result;
+
+    return (data as []).map((item: any) => {
+      return {
+        path: item["path"],
+        mountpoint: item["mountpoint"],
+        fstype: item["fstype"],
+        fssize: item["fssize"],
+        fsvail: item["fsvail"],
+      } as MotionPoint;
+    });
   }
 
   // add_library_folder

@@ -54,7 +54,7 @@ def get_mountpoint():
     mountpoint_list = []
     command = """
 # 使用 lsblk 获取信息，排除指定条件的行，并输出结果
-lsblk -rno PATH,MOUNTPOINT,FSTYPE,FSSIZE | while read -r path mountpoint fstype fssize; do
+lsblk -rno PATH,MOUNTPOINT,FSTYPE,FSSIZE,FSAVAIL,PARTTYPENAME | while read -r path mountpoint fstype fssize fsvail parttype_name; do
     # 检查是否有足够的字段
     if [ -n "$path" ] && [ -n "$mountpoint" ] && [ -n "$fstype" ] && [ -n "$fssize" ]; then
         # 检查挂载点路径是否不以 /frzr_root 开头
@@ -62,7 +62,7 @@ lsblk -rno PATH,MOUNTPOINT,FSTYPE,FSSIZE | while read -r path mountpoint fstype 
             # 检查 fstype 是否为指定的几种之一
             case "$fstype" in
                 ntfs|ext4|btrfs|exfat)
-                    echo "$path $mountpoint $fstype $fssize"
+                    echo "$path $mountpoint $fstype $fssize $fsvail $parttype_name"
                     ;;
             esac
         fi
@@ -85,8 +85,12 @@ done
         # split to [path mountpoint fstype fssize]
         lines = stdout.split("\n")
         for line in lines:
-            path, mountpoint, fstype, fssize = line.split(" ")
-            if path and mountpoint and fstype and fssize:
+            path, mountpoint, fstype, fssize, fsvail, parttype_name = line.split(" ")
+            if path and mountpoint and fstype and fssize and fsvail and parttype_name:
+                parttype_name = bytes(parttype_name, "utf-8").decode("unicode_escape")
+                logging.info(f"get_mountpoint: {path}, {mountpoint}, {fstype}, {fssize}, {fsvail}, {parttype_name}")
+                if fstype == "ntfs" and parttype_name == "Windows recovery environment":
+                    continue
                 # dict
                 mountpoint_list.append(
                     {
@@ -94,6 +98,7 @@ done
                         "mountpoint": mountpoint,
                         "fstype": fstype,
                         "fssize": fssize,
+                        "fsvail": fsvail,
                     }
                 )
         logging.info(f"get_mountpoint: {mountpoint_list}")
