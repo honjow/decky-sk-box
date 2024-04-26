@@ -17,14 +17,15 @@ export const ToolComponent: VFC = () => {
   const [showBootToWindows, _] = useState<boolean>(Settings.showBootToWindows);
 
   const bootToWindows = async () => {
-    await Backend.bootToWindows();
+    // await Backend.bootToWindows();
+    showModal(<BootToWinModal />);
   }
 
   const addSteamLibrary = async () => {
     const mountpoints = await Backend.getMountpoint();
     // log
     console.log(`mountpoints: ${mountpoints.map((p) => p.mountpoint).join(", ")}`);
-    showModal(<AddSteamLibraryModel mountpoints={mountpoints} />);
+    showModal(<AddSteamLibraryModal mountpoints={mountpoints} />);
   }
 
   return (
@@ -41,7 +42,7 @@ export const ToolComponent: VFC = () => {
         <ActionButtonItem
           onClick={addSteamLibrary}
           debugLabel="addSteamLibrary"
-          description="可以不用切换到桌面模式的 Steam 中添加, 但是不能检测已添加上的游戏库"
+          description="可以直接添加 Steam 游戏库, 省去切换桌面模式的步骤, 但是不能自动排除已经添加为库的路径。主要用于添加新的空库, 现有游戏库默认情况已经会自动添加"
         > 添加 Steam 游戏库
         </ActionButtonItem>
       </PanelSectionRow>
@@ -50,13 +51,38 @@ export const ToolComponent: VFC = () => {
 
 }
 
-export interface AddSteamLibraryModelProps {
+export interface BootToWinModalProps {
+  closeModal?: () => void;
+}
+
+export const BootToWinModal: VFC<BootToWinModalProps> = ({ closeModal }) => {
+  return (
+    <ModalRoot closeModal={closeModal}>
+      <div>
+        <PanelSection title={"重启到 Windows"}>
+          <PanelSectionRow>
+            您确认吗?
+          </PanelSectionRow>
+        </PanelSection>
+      </div>
+      <Focusable style={{ marginBlockEnd: "-25px", marginBlockStart: "-5px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridTemplateRows: "repeat(1, 1fr)", gridGap: "0.5rem", padding: "8px 0" }}>
+        <DialogButton onClick={async () => {
+          await Backend.bootToWindows();
+          closeModal?.();
+        }}> {"确认"}</DialogButton>
+        <DialogButton onClick={closeModal}> {"取消"}</DialogButton>
+      </Focusable>
+    </ModalRoot>
+  );
+}
+
+export interface AddSteamLibraryModalProps {
   closeModal?: () => void;
   mountpoints: MotionPoint[];
 }
 
 
-export const AddSteamLibraryModel: VFC<AddSteamLibraryModelProps> = ({ closeModal, mountpoints }) => {
+export const AddSteamLibraryModal: VFC<AddSteamLibraryModalProps> = ({ closeModal, mountpoints }) => {
   return (
     <ModalRoot closeModal={closeModal}>
       <div>
@@ -125,7 +151,7 @@ export const MountpointInfiModel: VFC<MountpointInfiModelProps> = ({ mountpoint,
           if (await Backend.addLibraryFolder(mountpoint.mountpoint)) {
             closeModal?.();
           }
-        }}> {"确定添加"}</DialogButton>
+        }}> {"确认添加"}</DialogButton>
         <DialogButton onClick={closeModal}> {"取消"}</DialogButton>
       </Focusable>
     </ModalRoot>
