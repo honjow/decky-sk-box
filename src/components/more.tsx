@@ -1,7 +1,8 @@
-import { ButtonItem, Field, PanelSection, PanelSectionRow } from "decky-frontend-lib";
+import { Field, PanelSection, PanelSectionRow } from "decky-frontend-lib";
 import { VFC } from "react";
 import { Backend } from "../backend";
 import { useUpdate } from "../hooks";
+import { ActionButtonItem } from ".";
 
 export const MoreComponent: VFC = () => {
     const { currentVersion, latestVersion, addonVersion, sktVersion } = useUpdate();
@@ -15,12 +16,12 @@ export const MoreComponent: VFC = () => {
     return (
         <PanelSection title="更多">
             <PanelSectionRow>
-                <ButtonItem
+                <ActionButtonItem
                     layout="below"
                     onClick={() => {
                         Backend.updateLatest();
                     }}
-                >{uptButtonText}</ButtonItem>
+                >{uptButtonText}</ActionButtonItem>
             </PanelSectionRow>
             <PanelSectionRow>
                 <Field focusable label={"当前版本"}>

@@ -1,6 +1,6 @@
 {
   "name": "decky-sk-box",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Decky plugins for Sk-ChimeraOS",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
