@@ -14,10 +14,24 @@ export const useSwitch = () => {
   const [enableFirmwareOverride, setEnableFirmwareOverride] = useState(
     Settings.enableFirmwareOverride
   );
+
+  const [enableInputPlumber, setEnableInputPlumber] = useState(
+    Settings.enableInputPlumber
+  );
+
+  const [hhdInstalled, setHHDInstalled] = useState(Settings.hhdInstalled);
+  const [handyConInstalled, setHandyConInstalled] = useState(
+    Settings.handyConInstalled
+  );
+  const [inputPlumberInstalled, setInputPlumberInstalled] = useState(
+    Settings.inputPlumberInstalled
+  );
+
   useEffect(() => {
     Settings.enableKeepBoot = enableKeepBoot;
     Settings.enableHHD = enableHHD;
     Settings.enableHandyCon = enableHandyCon;
+    Settings.enableInputPlumber = enableInputPlumber;
     Settings.enableUSBWakeup = enableUSBWakeup;
     Settings.enableHibernate = enableHibernate;
     Settings.enableFirmwareOverride = enableFirmwareOverride;
@@ -31,21 +45,43 @@ export const useSwitch = () => {
   ]);
 
   useEffect(() => {
+    Settings.hhdInstalled = hhdInstalled;
+    Settings.handyConInstalled = handyConInstalled;
+    Settings.inputPlumberInstalled = inputPlumberInstalled;
+  }, [
+    hhdInstalled,
+    handyConInstalled,
+    inputPlumberInstalled,
+  ]);
+
+
+
+  useEffect(() => {
     const getDate = async () => {
       const _enableKeepBoot = await Backend.getAutoKeepBootEnabled();
       const _enableHHD = await Backend.getHHDEnabled();
       const _enableHandyCon = await Backend.getHandyConEnabled();
+      const _enableInputPlumber = await Backend.getInputPlumberEnabled();
       const _enableUSBWakeup = await Backend.getUsbWakeupEnabled();
       const _enableHibernate = await Backend.getHibernateEnabled();
       const _enableFirmwareOverride =
         await Backend.getFirmwareOverrideEnabled();
 
+      const _hhdInstalled = await Backend.hhdInstalled();
+      const _handyConInstalled = await Backend.handyconInstalled();
+      const _inputPlumberInstalled = await Backend.inputplumberInstalled();
+
       setEnableKeepBoot(_enableKeepBoot);
       setEnableHHD(_enableHHD);
       setEnableHandyCon(_enableHandyCon);
+      setEnableInputPlumber(_enableInputPlumber);
       setEnableUSBWakeup(_enableUSBWakeup);
       setEnableHibernate(_enableHibernate);
       setEnableFirmwareOverride(_enableFirmwareOverride);
+
+      setHHDInstalled(_hhdInstalled);
+      setHandyConInstalled(_handyConInstalled);
+      setInputPlumberInstalled(_inputPlumberInstalled);
     };
     getDate();
   }, []);
@@ -59,6 +95,7 @@ export const useSwitch = () => {
   const updateHHD = async (enable: boolean) => {
     if (enable === true) {
       setEnableHandyCon(false);
+      setEnableInputPlumber(false);
     }
     await Backend.setHHDEnabled(enable);
     Settings.enableHHD = enable;
@@ -68,10 +105,21 @@ export const useSwitch = () => {
   const updateHandyCon = async (enable: boolean) => {
     if (enable === true) {
       setEnableHHD(false);
+      setEnableInputPlumber(false);
     }
     await Backend.setHandyConEnabled(enable);
     Settings.enableHandyCon = enable;
     setEnableHandyCon(enable);
+  };
+
+  const updateInputPlumber = async (enable: boolean) => {
+    if (enable === true) {
+      setEnableHHD(false);
+      setEnableHandyCon(false);
+    }
+    await Backend.setInputPlumberEnabled(enable);
+    Settings.enableInputPlumber = enable;
+    setEnableInputPlumber(enable);
   };
 
   const updateUSBWakeup = async (enable: boolean) => {
@@ -99,11 +147,16 @@ export const useSwitch = () => {
     updateHHD,
     enableHandyCon,
     updateHandyCon,
+    enableInputPlumber,
+    updateInputPlumber,
     enableUSBWakeup,
     updateUSBWakeup,
     enableHibernate,
     updateHibernate,
     enableFirmwareOverride,
     updateFirmwareOverride,
+    hhdInstalled,
+    handyConInstalled,
+    inputPlumberInstalled,
   };
 };

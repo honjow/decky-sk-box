@@ -60,6 +60,20 @@ export class Backend {
     });
   }
 
+  // get_inputplumber_enabled
+  public static async getInputPlumberEnabled(): Promise<boolean> {
+    return (
+      await this.serverAPI!.callPluginMethod("get_inputplumber_enabled", {})
+    ).result as boolean;
+  }
+
+  // set_inputplumber_enabled
+  public static async setInputPlumberEnabled(value: boolean) {
+    return await this.serverAPI!.callPluginMethod("set_inputplumber_enabled", {
+      enabled: value,
+    });
+  }
+
   // get_hhd_enabled
   public static async getHHDEnabled(): Promise<boolean> {
     return (await this.serverAPI!.callPluginMethod("get_hhd_enabled", {}))
@@ -268,5 +282,23 @@ export class Backend {
       return false;
     }
     return result.result as boolean;
+  }
+
+  // hhd_installed
+  public static async hhdInstalled(): Promise<boolean> {
+    return (await this.serverAPI!.callPluginMethod("hhd_installed", {}))
+      .result as boolean;
+  }
+
+  // handycon_installed
+  public static async handyconInstalled(): Promise<boolean> {
+    return (await this.serverAPI!.callPluginMethod("handycon_installed", {}))
+      .result as boolean;
+  }
+
+  // inputplumber_installed
+  public static async inputplumberInstalled(): Promise<boolean> {
+    return (await this.serverAPI!.callPluginMethod("inputplumber_installed", {}))
+      .result as boolean;
   }
 }

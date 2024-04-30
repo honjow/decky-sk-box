@@ -20,12 +20,17 @@ export const SwitchComponent: VFC = () => {
     updateHHD,
     enableHandyCon,
     updateHandyCon,
+    enableInputPlumber,
+    updateInputPlumber,
     enableUSBWakeup,
     updateUSBWakeup,
     enableHibernate,
     updateHibernate,
     enableFirmwareOverride,
     updateFirmwareOverride,
+    hhdInstalled,
+    handyConInstalled,
+    inputPlumberInstalled,
   } = useSwitch();
 
   useEffect(() => {
@@ -58,22 +63,30 @@ export const SwitchComponent: VFC = () => {
             onChange={updateKeepBoot}
           />
         </PanelSectionRow>
-        <PanelSectionRow>
+        {hhdInstalled && <PanelSectionRow>
           <ToggleField
             label={"HHD"}
             description={"Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用"}
             checked={enableHHD}
             onChange={updateHHD}
           />
-        </PanelSectionRow>
-        <PanelSectionRow>
+        </PanelSectionRow>}
+        {handyConInstalled && <PanelSectionRow>
           <ToggleField
             label={"HandyGCCS"}
             description={"用来驱动部分掌机的手柄按钮, 不能和 HHD 同时使用."}
             checked={enableHandyCon}
             onChange={updateHandyCon}
           />
-        </PanelSectionRow>
+        </PanelSectionRow>}
+        {inputPlumberInstalled && <PanelSectionRow>
+          <ToggleField
+            label={"InputPlumber"}
+            description={"HandyGCCS 的替代品, 奇美拉官方出品. 控制器驱动"}
+            checked={enableInputPlumber}
+            onChange={updateInputPlumber}
+          />
+        </PanelSectionRow>}
         <PanelSectionRow>
           <ToggleField
             label={"休眠"}

@@ -45,6 +45,11 @@ export class Settings {
   private _enableUSBWakeup: boolean = false;
   private _enableHibernate: boolean = false;
   private _enableFirmwareOverride: boolean = false;
+  private _enableInputPlumber: boolean = false;
+
+  private _hhdInstalled: boolean = false;
+  private _handyConInstalled: boolean = false;
+  private _inputPlumberInstalled: boolean = false;
 
   private _enableAutoUpdate: boolean = false;
   private _enableAutoUpdateHandyGCCS: boolean = false;
@@ -299,5 +304,37 @@ export class Settings {
 
   public static set showBootToWindows(value: boolean) {
     this._instance._showBootToWindows = value;
+  }
+
+  public static get enableInputPlumber(): boolean {
+    return this._instance._enableInputPlumber;
+  }
+
+  public static set enableInputPlumber(value: boolean) {
+    this._instance._enableInputPlumber = value;
+  }
+
+  public static get hhdInstalled(): boolean {
+    return this._instance._hhdInstalled;
+  }
+
+  public static set hhdInstalled(value: boolean) {
+    this._instance._hhdInstalled = value;
+  }
+
+  public static get handyConInstalled(): boolean {
+    return this._instance._handyConInstalled;
+  }
+
+  public static set handyConInstalled(value: boolean) {
+    this._instance._handyConInstalled = value;
+  }
+
+  public static get inputPlumberInstalled(): boolean {
+    return this._instance._inputPlumberInstalled;
+  }
+
+  public static set inputPlumberInstalled(value: boolean) {
+    this._instance._inputPlumberInstalled = value;
   }
 }

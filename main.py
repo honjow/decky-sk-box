@@ -54,11 +54,34 @@ class Plugin:
     async def set_handycon_enabled(self, enabled: bool):
         try:
             if enabled:
-                utils.toggle_service(f"hhd@{USER}.service", not enabled)
+                try:
+                    utils.toggle_service(f"hhd@{USER}.service", not enabled)
+                    utils.toggle_service("inputplumber.service", not enabled)
+                except Exception as e:
+                    logging.error(f"Error setting HHD/InputPlumber disabled: {e}")
             utils.toggle_service("handycon.service", enabled)
             return True
         except Exception as e:
             logging.error(f"Error setting HandyCon enabled: {e}")
+            return False
+        
+    # get_inputplumber_enabled
+    async def get_inputplumber_enabled(self):
+        return utils.check_service_autostart("inputplumber.service")
+    
+    # set_inputplumber_enabled
+    async def set_inputplumber_enabled(self, enabled: bool):
+        try:
+            if enabled:
+                try:
+                    utils.toggle_service(f"hhd@{USER}.service", not enabled)
+                    utils.toggle_service("handycon.service", not enabled)
+                except Exception as e:
+                    logging.error(f"Error setting HHD/HandyCon disabled: {e}")
+            utils.toggle_service("inputplumber.service", enabled)
+            return True
+        except Exception as e:
+            logging.error(f"Error setting Input Plumber enabled: {e}")
             return False
 
     async def get_hhd_enabled(self):
@@ -67,12 +90,25 @@ class Plugin:
     async def set_hhd_enabled(self, enabled: bool):
         try:
             if enabled:
-                utils.toggle_service("handycon.service", not enabled)
+                try:
+                    utils.toggle_service("handycon.service", not enabled)
+                    utils.toggle_service("inputplumber.service", not enabled)
+                except Exception as e:
+                    logging.error(f"Error setting HandyCon/InputPlumber disabled: {e}")
             utils.toggle_service(f"hhd@{USER}.service", enabled)
             return True
         except Exception as e:
             logging.error(f"Error setting HHD enabled: {e}")
             return False
+        
+    async def hhd_installed(self):
+        return os.path.exists("/usr/bin/hhd")
+    
+    async def handycon_installed(self):
+        return os.path.exists("/usr/bin/handycon")
+    
+    async def inputplumber_installed(self):
+        return os.path.exists("/usr/bin/inputplumber")
 
     async def get_auto_keep_boot_enabled(self):
         return utils.check_service_autostart("sk-auto-keep-boot-entry.service")
