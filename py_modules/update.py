@@ -9,15 +9,9 @@ import urllib.request
 
 from config import logging
 import decky_plugin
+from utils import recursive_chmod
 
 api_url = "http://api.github.com/repos/honjow/decky-sk-box/releases/latest"
-
-def recursive_chmod(path, perms):
-    for dirpath, dirnames, filenames in os.walk(path):
-        current_perms = os.stat(dirpath).st_mode
-        os.chmod(dirpath, current_perms | perms)
-        for filename in filenames:
-            os.chmod(os.path.join(dirpath, filename), current_perms | perms)
 
 
 def update_latest():
@@ -84,13 +78,14 @@ def download_latest_build():
 
     return file_path
 
+
 def get_latest_version():
     gcontext = ssl.SSLContext()
 
     response = urllib.request.urlopen(api_url, context=gcontext)
     json_data = json.load(response)
 
-    tag =  json_data.get("tag_name")
+    tag = json_data.get("tag_name")
     # if tag is a v* tag, remove the v
     if tag.startswith("v"):
         tag = tag[1:]

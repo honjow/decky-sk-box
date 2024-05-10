@@ -2,14 +2,16 @@
 # coding=utf-8
 
 import configparser
+import grp
 import os
+import pwd
 import queue
 import random
 import subprocess
 import glob
 import threading
 
-from config import logging, SK_TOOL_SCRIPTS_PATH, USER
+from config import logging, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME
 
 
 # 执行命令
@@ -91,7 +93,10 @@ def check_service_autostart(service_name):
         )
         logging.info(f"检查服务 {service_name} 是否已启用: {output}")
         return output == "enabled"
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        logging.error(
+            f"检查服务 {service_name} 是否已启用失败, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
+        )
         # 如果命令执行出错，则服务可能不存在或无法访问
         return False
 
@@ -104,8 +109,10 @@ def check_service_active(service_name):
             .strip()
         )
         return output == "active"
-    except Exception as e:
-        logging.info(f"服务 {service_name} 不存在或无法访问: {e}")
+    except subprocess.CalledProcessError as e:
+        logging.error(
+            f"服务 {service_name} 不存在或无法访问: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
+        )
         return False
 
 
@@ -124,7 +131,9 @@ def check_service_exists(service_name):
 
         return not "Could not find unit" in stderr and not "Loaded: not-found" in stdout
     except subprocess.CalledProcessError as e:
-        logging.info(f"服务 {service_name} 不存在或无法访问: {e}")
+        logging.error(
+            f"服务 {service_name} 不存在或无法访问: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
+        )
         return False
 
 
@@ -135,7 +144,9 @@ def toggle_service(service_name, enable):
         subprocess.run(sudo_cmd, check=True)
         logging.info(f"服务 {service_name} {action}成功")
     except subprocess.CalledProcessError as e:
-        logging.error(f"服务 {service_name} {action}失败: {e}")
+        logging.error(
+            f"服务 {service_name} {action}失败: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
+        )
     except Exception as e:
         logging.error(f"服务 {service_name} {action}失败: {e}")
 
@@ -397,7 +408,7 @@ def get_config_value(file_path, section, key):
 
 
 def get_autoupdate_config(key):
-    conf_dir = f"/home/{USER}/.config/sk-chos-tool"
+    conf_dir = f"{USER_HOME}/.config/sk-chos-tool"
     os.makedirs(conf_dir, exist_ok=True)
     config_file = f"{conf_dir}/autoupdate.conf"
     section = "autoupdate"
@@ -405,15 +416,17 @@ def get_autoupdate_config(key):
     if value is None:
         value = "true"
         set_autoupdate_config(key, value)
+    recursive_chown_conf()
     return value
 
 
 def set_autoupdate_config(key, value):
-    conf_dir = f"/home/{USER}/.config/sk-chos-tool"
+    conf_dir = f"{USER_HOME}/.config/sk-chos-tool"
     os.makedirs(conf_dir, exist_ok=True)
     config_file = f"{conf_dir}/autoupdate.conf"
     section = "autoupdate"
     update_ini_file(config_file, section, key, value)
+    recursive_chown_conf()
 
 
 def set_autoupdate(pkg_name, enable):
@@ -427,10 +440,24 @@ def get_autoupdate(pkg_name):
     return value == "true"
 
 
-# def check_and_install_addon():
-#     file_path = "/usr/bin/__sk-chos-tool-update"
-#     if os.path.isfile(file_path):
-#         return
-#     else:
-#         from installs import this_app_cn_install
-#         this_app_cn_install()
+def recursive_chmod(path, perms):
+    for dirpath, dirnames, filenames in os.walk(path):
+        current_perms = os.stat(dirpath).st_mode
+        os.chmod(dirpath, current_perms | perms)
+        for filename in filenames:
+            os.chmod(os.path.join(dirpath, filename), current_perms | perms)
+
+
+def recursive_chown(path, uid, gid):
+    for dirpath, dirnames, filenames in os.walk(path):
+        os.chown(dirpath, uid, gid)
+        for filename in filenames:
+            os.chown(os.path.join(dirpath, filename), uid, gid)
+
+
+def recursive_chown_conf():
+    conf_dir = f"{USER_HOME}/.config/sk-chos-tool"
+    os.makedirs(conf_dir, exist_ok=True)
+    uid = pwd.getpwnam(USER).pw_uid
+    gid = pwd.getpwnam(USER).pw_gid
+    recursive_chown(conf_dir, uid, gid)

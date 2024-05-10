@@ -55,8 +55,8 @@ class Plugin:
         try:
             if enabled:
                 try:
-                    utils.toggle_service(f"hhd@{USER}.service", not enabled)
-                    utils.toggle_service("inputplumber.service", not enabled)
+                    utils.toggle_service(f"hhd@{USER}.service", False)
+                    utils.toggle_service("inputplumber.service", False)
                 except Exception as e:
                     logging.error(f"Error setting HHD/InputPlumber disabled: {e}")
             utils.toggle_service("handycon.service", enabled)
@@ -74,8 +74,8 @@ class Plugin:
         try:
             if enabled:
                 try:
-                    utils.toggle_service(f"hhd@{USER}.service", not enabled)
-                    utils.toggle_service("handycon.service", not enabled)
+                    utils.toggle_service(f"hhd@{USER}.service", False)
+                    utils.toggle_service("handycon.service", False)
                 except Exception as e:
                     logging.error(f"Error setting HHD/HandyCon disabled: {e}")
             utils.toggle_service("inputplumber.service", enabled)
@@ -91,8 +91,8 @@ class Plugin:
         try:
             if enabled:
                 try:
-                    utils.toggle_service("handycon.service", not enabled)
-                    utils.toggle_service("inputplumber.service", not enabled)
+                    utils.toggle_service("handycon.service", False)
+                    utils.toggle_service("inputplumber.service", False)
                 except Exception as e:
                     logging.error(f"Error setting HandyCon/InputPlumber disabled: {e}")
             utils.toggle_service(f"hhd@{USER}.service", enabled)
