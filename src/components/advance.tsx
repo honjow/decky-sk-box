@@ -2,16 +2,25 @@ import {
   ButtonItem,
   PanelSection,
   PanelSectionRow,
+  ToggleField,
 } from "decky-frontend-lib";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { VFC, useEffect, useState } from "react";
 import { Backend, Settings, SteamUtils } from "../backend";
 import { ActionButtonItem } from ".";
+import { useAdvance } from "../hooks";
 
 
 export const AdvanceComponent: VFC = () => {
   const [showAdvance, setShowAdvance] = useState<boolean>(Settings.showAdvance);
   const [swapfileMaking, setSwapfileMaking] = useState<boolean>(Settings.swapfileMaking);
+
+  const {
+    enableFirmwareOverride,
+    updateFirmwareOverride,
+    enableUSBWakeup,
+    updateUSBWakeup,
+  } = useAdvance();
 
   useEffect(() => {
     Settings.showAdvance = showAdvance;
@@ -58,7 +67,7 @@ export const AdvanceComponent: VFC = () => {
   }
 
   return (
-    <PanelSection title={"高级设置"}>
+    <PanelSection title={"高级"}>
       <PanelSectionRow>
         <ButtonItem
           layout="below"
@@ -105,6 +114,21 @@ export const AdvanceComponent: VFC = () => {
           >
             修复 /etc (完全)
           </ActionButtonItem>
+        </PanelSectionRow>
+        <PanelSectionRow>
+          <ToggleField
+            label={"firmware固件覆盖"}
+            description={"启用DSDT、EDID覆盖等, 用于修复和优化部分掌机的问题，切换后需要重启生效。建议开启"}
+            checked={enableFirmwareOverride}
+            onChange={updateFirmwareOverride}
+          />
+        </PanelSectionRow>
+        <PanelSectionRow>
+          <ToggleField
+            label={"USB唤醒"}
+            checked={enableUSBWakeup}
+            onChange={updateUSBWakeup}
+          />
         </PanelSectionRow>
         <PanelSectionRow>
           <ActionButtonItem

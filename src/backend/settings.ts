@@ -66,6 +66,8 @@ export class Settings {
   private _addonVersion: string = "";
   private _sktVersion: string = "";
 
+  private _sleepMode: string = "";
+
   private constructor() {
     this._settingsData = new SettingsData();
   }
@@ -76,12 +78,12 @@ export class Settings {
 
   public static async loadSettingsData() {
     const _settingsData = await Backend.getSettings();
-    console.log(`SettingsData: ${JSON.stringify(_settingsData)}`);
+    // console.log(`SettingsData: ${JSON.stringify(_settingsData)}`);
     this.settingsData.deepCopy(_settingsData);
   }
 
   public static async saveSettingsData() {
-    console.log(`SettingsData save: ${JSON.stringify(this.settingsData)}`);
+    // console.log(`SettingsData save: ${JSON.stringify(this.settingsData)}`);
     await Backend.setSettings(this.settingsData);
   }
 
@@ -148,6 +150,22 @@ export class Settings {
       if (Boolean(value)) {
         this._instance._showBootToWindows = true;
       }
+    });
+
+    Backend.hhdInstalled().then((value) => {
+      this._instance._hhdInstalled = value;
+    });
+
+    Backend.handyconInstalled().then((value) => {
+      this._instance._handyConInstalled = value;
+    });
+
+    Backend.inputplumberInstalled().then((value) => {
+      this._instance._inputPlumberInstalled = value;
+    });
+
+    Backend.getSleepMode().then((value) => {
+      this._instance._sleepMode = value;
     });
   }
 
@@ -336,5 +354,13 @@ export class Settings {
 
   public static set inputPlumberInstalled(value: boolean) {
     this._instance._inputPlumberInstalled = value;
+  }
+
+  public static get sleepMode(): string {
+    return this._instance._sleepMode;
+  }
+
+  public static set sleepMode(value: string) {
+    this._instance._sleepMode = value;
   }
 }

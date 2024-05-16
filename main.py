@@ -111,9 +111,14 @@ class Plugin:
         return os.path.exists("/usr/bin/inputplumber")
 
     async def get_auto_keep_boot_enabled(self):
-        return utils.check_service_autostart("sk-auto-keep-boot-entry.service")
+        try :
+            return utils.check_service_autostart("sk-auto-keep-boot-entry.service")
+        except Exception:
+            logging.error(f"Error getting Auto Keep Boot enabled", exc_info=True)
+            return False
 
     async def set_auto_keep_boot_enabled(self, enabled: bool):
+        logging.info(f"Setting Auto Keep Boot enabled: {enabled}")
         try:
             utils.toggle_service("sk-auto-keep-boot-entry.service", enabled)
             return True
@@ -131,6 +136,17 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error setting Hibernate enabled: {e}")
             return False
+        
+    async def get_sleep_mode(self):
+        return utils.get_sleep_mode()
+    
+    async def set_sleep_mode(self, sleep_mode: str):
+        try:
+            utils.set_sleep_mode(sleep_mode)
+            return True
+        except Exception as e:
+            logging.error(f"Error setting Sleep Mode: {e}")
+            return False
 
     async def firmware_override_enabled(self):
         return utils.chk_firmware_override()
@@ -147,6 +163,7 @@ class Plugin:
         return utils.check_service_autostart("sk-chos-tool-autoupdate.timer");
 
     async def set_enable_auto_update(self, enabled: bool):
+        logging.info(f"Setting Auto Update enabled: {enabled}")
         try:
             utils.toggle_service("sk-chos-tool-autoupdate.timer", enabled)
             return True
@@ -229,6 +246,7 @@ class Plugin:
             return False
         
     async def make_swapfile(self):
+        logging.info("Making swapfile")
         try:
             utils.make_swapfile()
             return True
@@ -237,6 +255,7 @@ class Plugin:
             return False
         
     async def reset_gnome(self):
+        logging.info("Resetting gnome")
         try:
             utils.reset_gnome()
             return True
