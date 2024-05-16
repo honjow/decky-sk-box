@@ -315,6 +315,21 @@ class Plugin:
             logging.error(traceback.format_exc())
             return False
 
+    async def set_hibernate_delay(self, delay: str):
+        try:
+            utils.set_hibernate_delay(delay)
+            return True
+        except Exception as e:
+            logging.error(f"Error setting Hibernate delay: {e}")
+            return False
+
+    async def get_hibernate_delay(self) -> str:
+        try:
+            return utils.get_hibernate_delay()
+        except Exception as e:
+            logging.error(f"Error getting Hibernate delay: {e}")
+            return ""
+
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):
         decky_plugin.logger.info("Migrating")

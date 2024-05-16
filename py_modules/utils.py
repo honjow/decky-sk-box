@@ -233,6 +233,30 @@ def set_sleep_mode(sleep_mode: SleepMode):
     run_command("sudo systemctl daemon-reload")
 
 
+def set_hibernate_delay(timeout: str):
+    logging.info(f"设置 hibernate_delay: {timeout}")
+    file_path = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf"
+    if not os.path.isfile(file_path):
+        run_command("sudo mkdir -p /etc/systemd/sleep.conf.d")
+        run_command(f"sudo touch {file_path}")
+    run_command(f"sudo echo -e '[Sleep]\nHibernateDelaySec={timeout}' > {file_path}")
+
+
+def get_hibernate_delay() -> str:
+    file_path = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf.conf"
+    if not os.path.isfile(file_path):
+        return "0"
+    try:
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+            for line in lines:
+                if "HibernateDelaySec" in line:
+                    return line.split("=")[1].strip()
+    except FileNotFoundError:
+        return ""
+    return ""
+
+
 def chk_grub_quiet_boot():
     file_path = "/etc/default/grub_quiet"
     if not os.path.isfile(file_path):

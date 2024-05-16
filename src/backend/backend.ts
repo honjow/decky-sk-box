@@ -327,4 +327,20 @@ export class Backend {
       sleep_mode: type.toString(),
     });
   }
+
+  // set_hibernate_delay
+  public static async setHibernateDelay(delay: number) {
+    return await this.serverAPI!.callPluginMethod("set_hibernate_delay", {
+      delay: delay,
+    });
+  }
+
+  // get_hibernate_delay
+  public static async getHibernateDelay(): Promise<string> {
+    const result = await this.serverAPI!.callPluginMethod("get_hibernate_delay", {});
+    if (!result.success) {
+      return "";
+    }
+    return result.result as string;
+  }
 }
