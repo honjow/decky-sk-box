@@ -2,6 +2,7 @@ import os
 
 
 import decky_plugin
+from py_enum import SleepMode
 import update
 import utils
 import boot_to_win
@@ -137,8 +138,14 @@ class Plugin:
             logging.error(f"Error setting Hibernate enabled: {e}")
             return False
         
-    async def get_sleep_mode(self):
-        return utils.get_sleep_mode()
+    async def get_sleep_mode(self) -> str:
+        # return utils.get_sleep_mode()
+        try:
+            result = utils.get_sleep_mode()
+            return result.value
+        except Exception:
+            logging.error(f"Error getting Sleep Mode", exc_info=True)
+            return SleepMode.SUSPEND.value
     
     async def set_sleep_mode(self, sleep_mode: str):
         try:
