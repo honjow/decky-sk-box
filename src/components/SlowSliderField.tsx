@@ -22,6 +22,7 @@ export interface SlowSliderFieldProps extends ItemProps {
   onChange?(value: number): void;
   onChangeEnd?(value: number): void;
   className?: string;
+  delay?: number;
 }
 export const SlowSliderField: FC<SlowSliderFieldProps> = (slider) => {
   const [changeValue, SetChangeValue] = useState<number>(slider.value);
@@ -33,7 +34,7 @@ export const SlowSliderField: FC<SlowSliderFieldProps> = (slider) => {
         slider.onChangeEnd?.call(slider, slider.value);
         isChanging.current = false;
       }
-    }, 500);
+    }, slider.delay || 500);
   }, [changeValue]);
   return (
     <SliderField

@@ -123,7 +123,8 @@ export const GeneralComponent: VFC = () => {
             notchLabels={sleepNotchLabels}
             notchTicksVisible={true}
             showValue={false}
-            onChange={updateMode}
+            onChangeEnd={updateMode}
+            delay={2000}
           />
         </PanelSectionRow>
         {/* <PanelSectionRow>

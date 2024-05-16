@@ -22,7 +22,7 @@ export const useGeneral = () => {
     Settings.inputPlumberInstalled
   );
 
-  const [sleepMode, setSleepMode] = useState<SleepMode>(SleepMode.SUSPEND);
+  const [sleepMode, setSleepMode] = useState<SleepMode>(Settings.sleepMode as SleepMode || SleepMode.SUSPEND);
 
   useEffect(() => {
     Settings.enableKeepBoot = enableKeepBoot;
@@ -65,7 +65,7 @@ export const useGeneral = () => {
         const _handyConInstalled = await Backend.handyconInstalled();
         const _inputPlumberInstalled = await Backend.inputplumberInstalled();
 
-        // const _sleepMode = await Backend.getSleepMode();
+        const _sleepMode = await Backend.getSleepMode();
 
         setEnableKeepBoot(_enableKeepBoot);
         setEnableHHD(_enableHHD);
@@ -76,7 +76,7 @@ export const useGeneral = () => {
         setHHDInstalled(_hhdInstalled);
         setHandyConInstalled(_handyConInstalled);
         setInputPlumberInstalled(_inputPlumberInstalled);
-        // setSleepMode(_sleepMode as SleepMode || SleepMode.SUSPEND);
+        setSleepMode(_sleepMode as SleepMode || SleepMode.SUSPEND);
       } catch (e) {
         console.error(`getDate general error: ${e}`);
       }

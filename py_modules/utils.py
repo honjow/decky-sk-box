@@ -217,13 +217,13 @@ def get_sleep_mode() -> SleepMode:
     return SleepMode.SUSPEND
 
 
-def set_sleep_mode(sleep_type: SleepMode):
-    logging.info(f"设置睡眠类型: {sleep_type}")
-    if sleep_type == SleepMode.HIBERNATE:
+def set_sleep_mode(sleep_mode: SleepMode):
+    logging.info(f"设置睡眠类型: {sleep_mode}")
+    if sleep_mode == SleepMode.HIBERNATE:
         run_command(
             "sudo cp /lib/systemd/system/systemd-hibernate.service /etc/systemd/system/systemd-suspend.service"
         )
-    elif sleep_type == SleepMode.SUSPEND_THEN_HIBERNATE:
+    elif sleep_mode == SleepMode.SUSPEND_THEN_HIBERNATE:
         run_command(
             "sudo cp /lib/systemd/system/systemd-suspend-then-hibernate.service /etc/systemd/system/systemd-suspend.service"
         )

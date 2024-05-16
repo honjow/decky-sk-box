@@ -311,24 +311,20 @@ export class Backend {
 
   // get_sleep_mode
   public static async getSleepMode(): Promise<SleepMode> {
-    // try {
-    //   return (await this.serverAPI!.callPluginMethod("get_sleep_mode", {}))
-    //     .result as SleepMode;
-    // } catch (e) {
-    //   console.error(`getSleepType error: ${e}`);
-    //   return SleepMode.SUSPEND;
-    // }
     const result = await this.serverAPI!.callPluginMethod("get_sleep_mode", {});
+    console.log(">>>>>>>> getSleepMode", result);
     if (!result.success) {
       return SleepMode.SUSPEND;
     }
+    const sleepMode = result.result as String;
+    console.log(">>>>>>>> getSleepMode", sleepMode);
     return result.result as SleepMode;
   }
 
   // set_sleep_mode
   public static async setSleepMode(type: SleepMode) {
     return await this.serverAPI!.callPluginMethod("set_sleep_mode", {
-      type: type,
+      sleep_mode: type.toString(),
     });
   }
 }
