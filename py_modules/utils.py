@@ -11,7 +11,7 @@ import subprocess
 import glob
 import threading
 
-from config import logging, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME
+from config import HIBERNATE_DELAY_FILE, logging, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME
 from py_enum import SleepMode
 
 
@@ -235,17 +235,18 @@ def set_sleep_mode(sleep_mode: SleepMode):
 
 def set_hibernate_delay(timeout: str):
     logging.info(f"设置 hibernate_delay: {timeout}")
-    file_path = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf"
+    file_path = HIBERNATE_DELAY_FILE
     if not os.path.isfile(file_path):
         run_command("sudo mkdir -p /etc/systemd/sleep.conf.d")
         run_command(f"sudo touch {file_path}")
     run_command(f"sudo echo -e '[Sleep]\nHibernateDelaySec={timeout}' > {file_path}")
+    run_command("sudo systemctl kill -s HUP systemd-logind")
 
 
 def get_hibernate_delay() -> str:
-    file_path = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf.conf"
+    file_path = HIBERNATE_DELAY_FILE
     if not os.path.isfile(file_path):
-        return "0"
+        return ""
     try:
         with open(file_path, "r") as file:
             lines = file.readlines()

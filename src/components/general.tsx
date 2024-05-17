@@ -1,5 +1,6 @@
 import {
   ButtonItem,
+  DropdownItem,
   NotchLabel,
   PanelSection,
   PanelSectionRow,
@@ -7,7 +8,7 @@ import {
 } from "decky-frontend-lib";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { VFC, useEffect, useState } from "react";
-import { Settings, SleepMode } from "../backend";
+import { Settings, SleepMode, defaultDelay, delayList } from "../backend";
 import { useGeneral } from "../hooks";
 import { SlowSliderField } from ".";
 
@@ -29,6 +30,8 @@ export const GeneralComponent: VFC = () => {
     inputPlumberInstalled,
     sleepMode,
     updateSleepMode,
+    hibernateDelay,
+    updateHibernateDelay,
   } = useGeneral();
 
   useEffect(() => {
@@ -58,6 +61,10 @@ export const GeneralComponent: VFC = () => {
   });
 
   const updateMode = (mode: number) => {
+    updateSleepMode(numberToMode(mode), false);
+  }
+
+  const updateModeEnd = (mode: number) => {
     updateSleepMode(numberToMode(mode));
   }
 
@@ -114,7 +121,7 @@ export const GeneralComponent: VFC = () => {
         <PanelSectionRow>
           <SlowSliderField
             label={'睡眠模式'}
-            description={'选择睡眠模式, 睡眠是默认选择。休眠是将系统状态保存到硬盘，再关机，速度较慢。睡眠后休眠是先睡眠，在达到设置的时间后自动休眠，但是部分设备上可能存在问题'}
+            description={'选择睡眠模式, 睡眠是默认选择。休眠是将系统状态保存到硬盘，再关机，速度较慢。睡眠后休眠 是先睡眠，在达到设置的时间后自动休眠，但是部分设备上可能存在问题'}
             value={modeToNumber(sleepMode)}
             min={0}
             max={sleepOptions.length - 1}
@@ -123,10 +130,29 @@ export const GeneralComponent: VFC = () => {
             notchLabels={sleepNotchLabels}
             notchTicksVisible={true}
             showValue={false}
-            onChangeEnd={updateMode}
+            onChange={updateMode}
+            onChangeEnd={updateModeEnd}
             delay={2000}
           />
         </PanelSectionRow>
+        {sleepMode == SleepMode.SUSPEND_THEN_HIBERNATE && <PanelSectionRow>
+          <DropdownItem
+            label={"休眠延迟"}
+            description={"睡眠后多长时间进入休眠"}
+            rgOptions={delayList.map((item) => {
+              return {
+                label: item.label,
+                data: item.data,
+              };
+            })}
+            onChange={
+              (data) => {
+                updateHibernateDelay(data.data);
+              }
+            }
+            selectedOption={hibernateDelay || defaultDelay}
+          />
+        </PanelSectionRow>}
         {/* <PanelSectionRow>
           <ToggleField
             label={"休眠"}

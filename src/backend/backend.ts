@@ -329,7 +329,7 @@ export class Backend {
   }
 
   // set_hibernate_delay
-  public static async setHibernateDelay(delay: number) {
+  public static async setHibernateDelay(delay: string) {
     return await this.serverAPI!.callPluginMethod("set_hibernate_delay", {
       delay: delay,
     });

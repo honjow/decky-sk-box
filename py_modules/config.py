@@ -29,3 +29,5 @@ USER = decky_plugin.DECKY_USER
 USER_HOME = decky_plugin.DECKY_USER_HOME
 
 CONFIG_KEY = "sk-box"
+
+HIBERNATE_DELAY_FILE = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf"

@@ -316,6 +316,7 @@ class Plugin:
             return False
 
     async def set_hibernate_delay(self, delay: str):
+        logging.info(f"Setting Hibernate delay: {delay}")
         try:
             utils.set_hibernate_delay(delay)
             return True
@@ -325,7 +326,9 @@ class Plugin:
 
     async def get_hibernate_delay(self) -> str:
         try:
-            return utils.get_hibernate_delay()
+            result = utils.get_hibernate_delay()
+            logging.info(f"获取休眠延迟: {result}")
+            return result
         except Exception as e:
             logging.error(f"Error getting Hibernate delay: {e}")
             return ""

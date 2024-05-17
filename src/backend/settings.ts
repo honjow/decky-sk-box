@@ -1,5 +1,20 @@
 import { Backend } from ".";
 
+export const delayList = [
+  { data: '10sec', label: '10秒' },
+  { data: '30sec', label: '30秒' },
+  { data: '1min', label: '1分钟' },
+  { data: '5min', label: '5分钟' },
+  { data: '10min', label: '10分钟' },
+  { data: '30min', label: '30分钟' },
+  { data: '1hour', label: '1小时' },
+  { data: '2hour', label: '2小时' },
+  { data: '3hour', label: '3小时' },
+  { data: '6hour', label: '6小时' },
+  { data: '12hour', label: '12小时' },
+]
+export const defaultDelay = '30min';
+
 export class SettingsData {
   public showSwitch: boolean;
   public showAdvance: boolean;
@@ -67,6 +82,7 @@ export class Settings {
   private _sktVersion: string = "";
 
   private _sleepMode: string = "";
+  private _hibernateDelay: string = defaultDelay;
 
   private constructor() {
     this._settingsData = new SettingsData();
@@ -166,6 +182,13 @@ export class Settings {
 
     Backend.getSleepMode().then((value) => {
       this._instance._sleepMode = value;
+    });
+
+    Backend.getHibernateDelay().then((value) => {
+      if (value === "") {
+        this._instance._hibernateDelay = defaultDelay;
+        Backend.setHibernateDelay(this._instance._hibernateDelay);
+      }
     });
   }
 
@@ -362,5 +385,13 @@ export class Settings {
 
   public static set sleepMode(value: string) {
     this._instance._sleepMode = value;
+  }
+
+  public static get hibernateDelay(): string {
+    return this._instance._hibernateDelay;
+  }
+
+  public static set hibernateDelay(value: string) {
+    this._instance._hibernateDelay = value;
   }
 }

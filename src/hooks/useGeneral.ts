@@ -23,6 +23,7 @@ export const useGeneral = () => {
   );
 
   const [sleepMode, setSleepMode] = useState<SleepMode>(Settings.sleepMode as SleepMode || SleepMode.SUSPEND);
+  const [hibernateDelay, setHibernateDelay] = useState<string>(Settings.hibernateDelay);
 
   useEffect(() => {
     Settings.enableKeepBoot = enableKeepBoot;
@@ -34,6 +35,7 @@ export const useGeneral = () => {
     Settings.hhdInstalled = hhdInstalled;
     Settings.handyConInstalled = handyConInstalled;
     Settings.inputPlumberInstalled = inputPlumberInstalled;
+    Settings.hibernateDelay = hibernateDelay;
   }, [
     enableKeepBoot,
     enableHHD,
@@ -43,6 +45,7 @@ export const useGeneral = () => {
     hhdInstalled,
     handyConInstalled,
     inputPlumberInstalled,
+    hibernateDelay,
   ]);
 
 
@@ -66,6 +69,7 @@ export const useGeneral = () => {
         const _inputPlumberInstalled = await Backend.inputplumberInstalled();
 
         const _sleepMode = await Backend.getSleepMode();
+        const _hibernateDelay = await Backend.getHibernateDelay();
 
         setEnableKeepBoot(_enableKeepBoot);
         setEnableHHD(_enableHHD);
@@ -77,6 +81,7 @@ export const useGeneral = () => {
         setHandyConInstalled(_handyConInstalled);
         setInputPlumberInstalled(_inputPlumberInstalled);
         setSleepMode(_sleepMode as SleepMode || SleepMode.SUSPEND);
+        setHibernateDelay(_hibernateDelay);
       } catch (e) {
         console.error(`getDate general error: ${e}`);
       }
@@ -127,10 +132,18 @@ export const useGeneral = () => {
     setEnableHibernate(enable);
   };
 
-  const updateSleepMode = async (mode: SleepMode) => {
-    await Backend.setSleepMode(mode);
-    Settings.sleepMode = mode;
+  const updateSleepMode = async (mode: SleepMode, sendBackend = true) => {
     setSleepMode(mode);
+    if (sendBackend) {
+      Settings.sleepMode = mode;
+      await Backend.setSleepMode(mode);
+    }
+  }
+
+  const updateHibernateDelay = async (delay: string) => {
+    setHibernateDelay(delay);
+    Settings.hibernateDelay = delay;
+    await Backend.setHibernateDelay(delay);
   }
 
   return {
@@ -149,5 +162,7 @@ export const useGeneral = () => {
     inputPlumberInstalled,
     sleepMode,
     updateSleepMode,
+    hibernateDelay,
+    updateHibernateDelay,
   };
 };
