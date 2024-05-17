@@ -11,7 +11,8 @@ import subprocess
 import glob
 import threading
 
-from config import logging, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME
+from config import HIBERNATE_DELAY_FILE, logging, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME
+from py_enum import SleepMode
 
 
 # 执行命令
@@ -86,13 +87,17 @@ def get_package_version(package_name):
 # 检查服务是否已启用
 def check_service_autostart(service_name):
     try:
-        output = (
-            subprocess.check_output(["sudo", "systemctl", "is-enabled", service_name])
-            .decode()
-            .strip()
+        result = subprocess.run(
+            f"sudo systemctl is-enabled {service_name}",
+            shell=True,
+            text=True,
+            check=False,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
         )
-        logging.info(f"检查服务 {service_name} 是否已启用: {output}")
-        return output == "enabled"
+        stdout = result.stdout.strip()
+        logging.info(f"检查服务 {service_name} 是否已启用: {stdout}")
+        return stdout == "enabled"
     except subprocess.CalledProcessError as e:
         logging.error(
             f"检查服务 {service_name} 是否已启用失败, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
@@ -171,7 +176,6 @@ def chk_hibernate():
                     return True
     except FileNotFoundError:
         return False
-
     return False
 
 
@@ -191,6 +195,67 @@ def set_hibernate(enabled):
         run_command("sudo rm -f /etc/systemd/system/systemd-suspend.service")
     # 生效
     run_command("sudo systemctl daemon-reload")
+
+
+def get_sleep_mode() -> SleepMode:
+    file_path = "/etc/systemd/system/systemd-suspend.service"
+    hibernate_content = "systemd-sleep hibernate"
+    suspend_then_hibernate_content = "systemd-sleep suspend-then-hibernate"
+    if not os.path.isfile(file_path):
+        return SleepMode.SUSPEND
+    try:
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+            for line in lines:
+                if hibernate_content in line:
+                    return SleepMode.HIBERNATE
+                if suspend_then_hibernate_content in line:
+                    return SleepMode.SUSPEND_THEN_HIBERNATE
+    except Exception:
+        logging.error(f"获取休眠类型失败", exc_info=True)
+        return SleepMode.SUSPEND
+    return SleepMode.SUSPEND
+
+
+def set_sleep_mode(sleep_mode: SleepMode):
+    logging.info(f"设置睡眠类型: {sleep_mode}")
+    if sleep_mode == SleepMode.HIBERNATE:
+        run_command(
+            "sudo cp /lib/systemd/system/systemd-hibernate.service /etc/systemd/system/systemd-suspend.service"
+        )
+    elif sleep_mode == SleepMode.SUSPEND_THEN_HIBERNATE:
+        run_command(
+            "sudo cp /lib/systemd/system/systemd-suspend-then-hibernate.service /etc/systemd/system/systemd-suspend.service"
+        )
+    else:
+        run_command("sudo rm -f /etc/systemd/system/systemd-suspend.service")
+    # 生效
+    run_command("sudo systemctl daemon-reload")
+
+
+def set_hibernate_delay(timeout: str):
+    logging.info(f"设置 hibernate_delay: {timeout}")
+    file_path = HIBERNATE_DELAY_FILE
+    if not os.path.isfile(file_path):
+        run_command("sudo mkdir -p /etc/systemd/sleep.conf.d")
+        run_command(f"sudo touch {file_path}")
+    run_command(f"sudo echo -e '[Sleep]\nHibernateDelaySec={timeout}' > {file_path}")
+    run_command("sudo systemctl kill -s HUP systemd-logind")
+
+
+def get_hibernate_delay() -> str:
+    file_path = HIBERNATE_DELAY_FILE
+    if not os.path.isfile(file_path):
+        return ""
+    try:
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+            for line in lines:
+                if "HibernateDelaySec" in line:
+                    return line.split("=")[1].strip()
+    except FileNotFoundError:
+        return ""
+    return ""
 
 
 def chk_grub_quiet_boot():

@@ -30,6 +30,7 @@ export const useAutoUpdate = () => {
 
   useEffect(() => {
     const getDate = async () => {
+      console.log("getDate auto update");
       const _enableAutoUpdate = await Backend.getEnableAutoUpdate();
       const _enableAutoUpdateHandyGCCS = await Backend.getHandyUpdateEnabled();
       const _enableAutoUpdateHHD = await Backend.getHhdUpdateEnabled();

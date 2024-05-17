@@ -9,7 +9,7 @@ import {
   AdvanceComponent,
   AutoUpdateComponent,
   MoreComponent,
-  SwitchComponent,
+  GeneralComponent,
   ToolComponent,
 } from "./components";
 import { PluginManager } from "./backend";
@@ -19,7 +19,7 @@ const Content: VFC<{}> = () => {
   return (
     <>
       <ToolComponent />
-      <SwitchComponent />
+      <GeneralComponent />
       <AdvanceComponent />
       <AutoUpdateComponent />
       <MoreComponent />

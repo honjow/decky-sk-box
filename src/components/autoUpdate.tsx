@@ -29,7 +29,7 @@ export const AutoUpdateComponent: VFC = () => {
   }, [showAutoUpdate]);
 
   return (
-    <PanelSection title={"自动更新"}>
+    <PanelSection title={"更新"}>
       <PanelSectionRow>
         <ButtonItem
           layout="below"

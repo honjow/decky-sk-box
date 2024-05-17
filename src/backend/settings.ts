@@ -1,5 +1,20 @@
 import { Backend } from ".";
 
+export const delayList = [
+  { data: '10sec', label: '10秒' },
+  { data: '30sec', label: '30秒' },
+  { data: '1min', label: '1分钟' },
+  { data: '5min', label: '5分钟' },
+  { data: '10min', label: '10分钟' },
+  { data: '30min', label: '30分钟' },
+  { data: '1hour', label: '1小时' },
+  { data: '2hour', label: '2小时' },
+  { data: '3hour', label: '3小时' },
+  { data: '6hour', label: '6小时' },
+  { data: '12hour', label: '12小时' },
+]
+export const defaultDelay = '30min';
+
 export class SettingsData {
   public showSwitch: boolean;
   public showAdvance: boolean;
@@ -66,6 +81,9 @@ export class Settings {
   private _addonVersion: string = "";
   private _sktVersion: string = "";
 
+  private _sleepMode: string = "";
+  private _hibernateDelay: string = defaultDelay;
+
   private constructor() {
     this._settingsData = new SettingsData();
   }
@@ -76,12 +94,12 @@ export class Settings {
 
   public static async loadSettingsData() {
     const _settingsData = await Backend.getSettings();
-    console.log(`SettingsData: ${JSON.stringify(_settingsData)}`);
+    // console.log(`SettingsData: ${JSON.stringify(_settingsData)}`);
     this.settingsData.deepCopy(_settingsData);
   }
 
   public static async saveSettingsData() {
-    console.log(`SettingsData save: ${JSON.stringify(this.settingsData)}`);
+    // console.log(`SettingsData save: ${JSON.stringify(this.settingsData)}`);
     await Backend.setSettings(this.settingsData);
   }
 
@@ -147,6 +165,29 @@ export class Settings {
     Backend.getWinBootEntry().then((value) => {
       if (Boolean(value)) {
         this._instance._showBootToWindows = true;
+      }
+    });
+
+    Backend.hhdInstalled().then((value) => {
+      this._instance._hhdInstalled = value;
+    });
+
+    Backend.handyconInstalled().then((value) => {
+      this._instance._handyConInstalled = value;
+    });
+
+    Backend.inputplumberInstalled().then((value) => {
+      this._instance._inputPlumberInstalled = value;
+    });
+
+    Backend.getSleepMode().then((value) => {
+      this._instance._sleepMode = value;
+    });
+
+    Backend.getHibernateDelay().then((value) => {
+      if (value === "") {
+        this._instance._hibernateDelay = defaultDelay;
+        Backend.setHibernateDelay(this._instance._hibernateDelay);
       }
     });
   }
@@ -336,5 +377,21 @@ export class Settings {
 
   public static set inputPlumberInstalled(value: boolean) {
     this._instance._inputPlumberInstalled = value;
+  }
+
+  public static get sleepMode(): string {
+    return this._instance._sleepMode;
+  }
+
+  public static set sleepMode(value: string) {
+    this._instance._sleepMode = value;
+  }
+
+  public static get hibernateDelay(): string {
+    return this._instance._hibernateDelay;
+  }
+
+  public static set hibernateDelay(value: string) {
+    this._instance._hibernateDelay = value;
   }
 }

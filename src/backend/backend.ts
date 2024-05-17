@@ -1,5 +1,5 @@
 import { ServerAPI } from "decky-frontend-lib";
-import { SettingsData } from ".";
+import { SettingsData, SleepMode } from ".";
 
 export interface MotionPoint {
   path: string;
@@ -89,13 +89,20 @@ export class Backend {
 
   // get_auto_keep_boot_enabled
   public static async getAutoKeepBootEnabled(): Promise<boolean> {
-    return (
-      await this.serverAPI!.callPluginMethod("get_auto_keep_boot_enabled", {})
-    ).result as boolean;
+    // return (
+    //   await this.serverAPI!.callPluginMethod("get_auto_keep_boot_enabled", {})
+    // ).result as boolean;
+    try {
+      return (await this.serverAPI!.callPluginMethod("get_auto_keep_boot_enabled", {})).result as boolean;
+    } catch (e) {
+      console.error(`getAutoKeepBootEnabled error: ${e}`);
+      return false;
+    }
   }
 
   // set_auto_keep_boot_enabled
   public static async setAutoKeepBootEnabled(value: boolean) {
+    console.log("setAutoKeepBootEnabled", value);
     return await this.serverAPI!.callPluginMethod(
       "set_auto_keep_boot_enabled",
       { enabled: value }
@@ -300,5 +307,40 @@ export class Backend {
   public static async inputplumberInstalled(): Promise<boolean> {
     return (await this.serverAPI!.callPluginMethod("inputplumber_installed", {}))
       .result as boolean;
+  }
+
+  // get_sleep_mode
+  public static async getSleepMode(): Promise<SleepMode> {
+    const result = await this.serverAPI!.callPluginMethod("get_sleep_mode", {});
+    console.log(">>>>>>>> getSleepMode", result);
+    if (!result.success) {
+      return SleepMode.SUSPEND;
+    }
+    const sleepMode = result.result as String;
+    console.log(">>>>>>>> getSleepMode", sleepMode);
+    return result.result as SleepMode;
+  }
+
+  // set_sleep_mode
+  public static async setSleepMode(type: SleepMode) {
+    return await this.serverAPI!.callPluginMethod("set_sleep_mode", {
+      sleep_mode: type.toString(),
+    });
+  }
+
+  // set_hibernate_delay
+  public static async setHibernateDelay(delay: string) {
+    return await this.serverAPI!.callPluginMethod("set_hibernate_delay", {
+      delay: delay,
+    });
+  }
+
+  // get_hibernate_delay
+  public static async getHibernateDelay(): Promise<string> {
+    const result = await this.serverAPI!.callPluginMethod("get_hibernate_delay", {});
+    if (!result.success) {
+      return "";
+    }
+    return result.result as string;
   }
 }
