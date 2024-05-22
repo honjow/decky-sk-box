@@ -526,3 +526,14 @@ def recursive_chown_conf():
     uid = pwd.getpwnam(USER).pw_uid
     gid = pwd.getpwnam(USER).pw_gid
     recursive_chown(conf_dir, uid, gid)
+
+def support_umaf():
+    return os.path.isfile("/usr/libexec/boot-umaf")
+
+def boot_umaf():
+    command = "sudo /usr/libexec/boot-umaf"
+    return run_command(command, "启动UMAF")
+
+def boot_bios():
+    command = "sudo systemctl reboot --firmware-setup"
+    return run_command(command, "启动BIOS")

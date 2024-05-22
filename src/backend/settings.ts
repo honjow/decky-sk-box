@@ -84,6 +84,8 @@ export class Settings {
   private _sleepMode: string = "";
   private _hibernateDelay: string = defaultDelay;
 
+  private _supportUmaf: boolean = false;
+
   private constructor() {
     this._settingsData = new SettingsData();
   }
@@ -393,5 +395,13 @@ export class Settings {
 
   public static set hibernateDelay(value: string) {
     this._instance._hibernateDelay = value;
+  }
+
+  public static get supportUmaf(): boolean {
+    return this._instance._supportUmaf;
+  }
+
+  public static set supportUmaf(value: boolean) {
+    this._instance._supportUmaf = value;
   }
 }

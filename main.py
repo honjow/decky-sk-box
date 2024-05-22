@@ -332,6 +332,27 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error getting Hibernate delay: {e}")
             return ""
+    
+    async def support_umaf(self):
+        try:
+            return utils.support_umaf()
+        except Exception as e:
+            logging.error(f"Error getting umaf support: {e}")
+            return False
+    
+    async def boot_umaf(self):
+        try:
+            return utils.boot_umaf()
+        except Exception as e:
+            logging.error(f"Error booting umaf: {e}")
+            return False
+    
+    async def boot_bios(self):
+        try:
+            return utils.boot_bios()
+        except Exception as e:
+            logging.error(f"Error booting bios: {e}")
+            return False
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):

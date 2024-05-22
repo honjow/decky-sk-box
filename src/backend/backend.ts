@@ -343,4 +343,20 @@ export class Backend {
     }
     return result.result as string;
   }
+
+  // support_umaf
+  public static async supportUmaf(): Promise<boolean> {
+    return (await this.serverAPI!.callPluginMethod("support_umaf", {}))
+      .result as boolean;
+  }
+
+  // boot_umaf
+  public static async bootUmaf() {
+    return await this.serverAPI!.callPluginMethod("boot_umaf", {});
+  }
+
+  // boot_bios
+  public static async bootBios() {
+    return await this.serverAPI!.callPluginMethod("boot_bios", {});
+  }
 }

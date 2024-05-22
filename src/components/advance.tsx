@@ -20,6 +20,7 @@ export const AdvanceComponent: VFC = () => {
     updateFirmwareOverride,
     enableUSBWakeup,
     updateUSBWakeup,
+    supportUmaf,
   } = useAdvance();
 
   useEffect(() => {
@@ -66,6 +67,14 @@ export const AdvanceComponent: VFC = () => {
     console.log("resetGnome done");
   }
 
+  const handBootBios = async () => {
+    await Backend.bootBios();
+  }
+
+  const handBootUmaf = async () => {
+    await Backend.bootUmaf();
+  }
+
   return (
     <PanelSection title={"高级"}>
       <PanelSectionRow>
@@ -84,6 +93,21 @@ export const AdvanceComponent: VFC = () => {
         </ButtonItem>
       </PanelSectionRow>
       {showAdvance && <>
+        <PanelSectionRow>
+          <ActionButtonItem
+            onClick={handBootBios}
+          >
+            启动到 BIOS/UEFI 设置界面
+          </ActionButtonItem>
+        </PanelSectionRow>
+        {supportUmaf && <PanelSectionRow>
+          <ActionButtonItem
+            description={"启动到通用 AMD BIOS/UEFI 界面"}
+            onClick={handBootUmaf}
+          >
+            启动到 UMAF 设置界面
+          </ActionButtonItem>
+        </PanelSectionRow>}
         <PanelSectionRow>
           <ActionButtonItem
             onClick={handBootRepair}
