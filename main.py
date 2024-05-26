@@ -113,7 +113,7 @@ class Plugin:
 
     async def get_auto_keep_boot_enabled(self):
         try:
-            return utils.check_service_autostart("sk-auto-keep-boot-entry.service")
+            return utils.check_service_autostart("sk-setup-next-boot.service")
         except Exception:
             logging.error(f"Error getting Auto Keep Boot enabled", exc_info=True)
             return False
@@ -121,7 +121,7 @@ class Plugin:
     async def set_auto_keep_boot_enabled(self, enabled: bool):
         logging.info(f"Setting Auto Keep Boot enabled: {enabled}")
         try:
-            utils.toggle_service("sk-auto-keep-boot-entry.service", enabled)
+            utils.toggle_service("sk-setup-next-boot.service", enabled)
             return True
         except Exception as e:
             logging.error(f"Error setting Auto Keep Boot enabled: {e}")
