@@ -156,7 +156,7 @@ export class Settings {
       this._instance._enableAutoUpdateHandyGCCS = value;
     });
 
-    Backend.getHhdUpdateEnabled().then((value) => {
+    Backend.getHHDUpdateEnabled().then((value) => {
       this._instance._enableAutoUpdateHHD = value;
     });
 

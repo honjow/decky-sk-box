@@ -89,47 +89,47 @@ export const useGeneral = () => {
     getDate();
   }, []);
 
-  const updateKeepBoot = async (enable: boolean) => {
-    await Backend.setAutoKeepBootEnabled(enable);
-    Settings.enableKeepBoot = enable;
-    setEnableKeepBoot(enable);
+  const updateKeepBoot = async (val: boolean) => {
+    await Backend.setAutoKeepBootEnabled(val);
+    Settings.enableKeepBoot = val;
+    setEnableKeepBoot(val);
   };
 
-  const updateHHD = async (enable: boolean) => {
-    if (enable === true) {
+  const updateHHD = async (val: boolean) => {
+    if (val === true) {
       setEnableHandyCon(false);
       setEnableInputPlumber(false);
     }
-    await Backend.setHHDEnabled(enable);
-    Settings.enableHHD = enable;
-    setEnableHHD(enable);
+    await Backend.setHHDEnabled(val);
+    Settings.enableHHD = val;
+    setEnableHHD(val);
   };
 
-  const updateHandyCon = async (enable: boolean) => {
-    if (enable === true) {
+  const updateHandyCon = async (val: boolean) => {
+    if (val === true) {
       setEnableHHD(false);
       setEnableInputPlumber(false);
     }
-    await Backend.setHandyConEnabled(enable);
-    Settings.enableHandyCon = enable;
-    setEnableHandyCon(enable);
+    await Backend.setHandyConEnabled(val);
+    Settings.enableHandyCon = val;
+    setEnableHandyCon(val);
   };
 
-  const updateInputPlumber = async (enable: boolean) => {
-    if (enable === true) {
+  const updateInputPlumber = async (val: boolean) => {
+    if (val === true) {
       setEnableHHD(false);
       setEnableHandyCon(false);
     }
-    await Backend.setInputPlumberEnabled(enable);
-    Settings.enableInputPlumber = enable;
-    setEnableInputPlumber(enable);
+    await Backend.setInputPlumberEnabled(val);
+    Settings.enableInputPlumber = val;
+    setEnableInputPlumber(val);
   };
 
 
-  const updateHibernate = async (enable: boolean) => {
-    await Backend.setHibernateEnabled(enable);
-    Settings.enableHibernate = enable;
-    setEnableHibernate(enable);
+  const updateHibernate = async (val: boolean) => {
+    await Backend.setHibernateEnabled(val);
+    Settings.enableHibernate = val;
+    setEnableHibernate(val);
   };
 
   const updateSleepMode = async (mode: SleepMode, sendBackend = true) => {

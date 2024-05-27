@@ -179,7 +179,7 @@ export class Backend {
   }
 
   // get_hhd_update_enabled
-  public static async getHhdUpdateEnabled(): Promise<boolean> {
+  public static async getHHDUpdateEnabled(): Promise<boolean> {
     return (
       await this.serverAPI!.callPluginMethod("get_hhd_update_enabled", {})
     ).result as boolean;

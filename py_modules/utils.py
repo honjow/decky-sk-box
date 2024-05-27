@@ -2,7 +2,6 @@
 # coding=utf-8
 
 import configparser
-import grp
 import os
 import pwd
 import queue
@@ -20,7 +19,7 @@ def run_command(command, name=""):
     success = True
     ret_msg = ""
     stderr_queue = queue.Queue()  # 创建一个队列来存储stderr的内容
-    logging.info(f"执行{name}操作")
+    logging.debug(f"执行{name}操作")
     try:
         process = subprocess.Popen(
             command,
@@ -49,8 +48,6 @@ def run_command(command, name=""):
             if not stderr_queue.empty():  # 从队列中获取stderr的内容
                 ret_msg = stderr_queue.get()
             logging.error(f"{name}操作失败: {ret_msg}")
-        else:
-            logging.info(f"{name}操作完成")
 
     except Exception as e:
         success = False
@@ -463,6 +460,9 @@ def update_ini_file(file_path, section, key, new_value):
 
 def get_config_value(file_path, section, key):
     config = configparser.ConfigParser()
+    # 不保留section前缀
+    config.optionxform = lambda option: option.split(".")[-1]
+
     config.read(file_path)
 
     if config.has_section(section) and config.has_option(section, key):
@@ -478,6 +478,7 @@ def get_autoupdate_config(key):
     config_file = f"{conf_dir}/autoupdate.conf"
     section = "autoupdate"
     value = get_config_value(config_file, section, key)
+    logging.debug(f">>>>> get_autoupdate_config: {key} = {value}")
     if value is None:
         value = "true"
         set_autoupdate_config(key, value)
@@ -496,12 +497,14 @@ def set_autoupdate_config(key, value):
 
 def set_autoupdate(pkg_name, enable):
     key = f"autoupdate.{pkg_name}"
+    logging.info(f"set_autoupdate: {pkg_name} = {enable}")
     set_autoupdate_config(key, str(enable).lower())
 
 
 def get_autoupdate(pkg_name):
     key = f"autoupdate.{pkg_name}"
     value = get_autoupdate_config(key)
+    logging.info(f"get_autoupdate: {pkg_name} = {value}")
     return value == "true"
 
 
@@ -527,12 +530,15 @@ def recursive_chown_conf():
     gid = pwd.getpwnam(USER).pw_gid
     recursive_chown(conf_dir, uid, gid)
 
+
 def support_umaf():
     return os.path.isfile("/usr/libexec/boot-umaf")
+
 
 def boot_umaf():
     command = "sudo /usr/libexec/boot-umaf"
     return run_command(command, "启动UMAF")
+
 
 def boot_bios():
     command = "sudo systemctl reboot --firmware-setup"
