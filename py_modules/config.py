@@ -1,6 +1,6 @@
 import logging
 
-import decky_plugin
+import decky
 
 SK_TOOL_PATH = "/usr/share/sk-chos-tool"
 SK_TOOL_SCRIPTS_PATH = f"{SK_TOOL_PATH}/scripts"
@@ -25,8 +25,8 @@ except Exception as e:
     logging.error(f"exception|{e}")
     PRODUCT_NAME = "UNKNOWN"
 
-USER = decky_plugin.DECKY_USER
-USER_HOME = decky_plugin.DECKY_USER_HOME
+USER = decky.DECKY_USER
+USER_HOME = decky.DECKY_USER_HOME
 
 CONFIG_KEY = "sk-box"
 

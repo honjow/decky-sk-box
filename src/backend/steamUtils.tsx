@@ -1,7 +1,7 @@
-import { Module, findModuleChild } from "decky-frontend-lib";
-import { Backend } from ".";
+import { Module, findModuleChild } from "@decky/ui";
 import { ReactNode } from "react";
 import { FaDemocrat } from "react-icons/fa";
+import { toaster } from "@decky/api";
 
 //#region Find SteamOS modules
 const findModule = (property: string) => {
@@ -53,7 +53,7 @@ export class SteamUtils {
       playSound: playSound || false,
       showToast: showToast || false,
     };
-    Backend.getServerAPI().toaster.toast(toastData);
+    toaster.toast(toastData);
   }
 
   static async simpleToast(message: string, duration?: number) {

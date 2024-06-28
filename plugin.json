@@ -2,6 +2,7 @@
   "name": "SK Box",
   "author": "honjow",
   "flags": ["root"],
+  "api_version": 1,
   "publish": {
     "tags": ["root"],
     "description": "Decky plugins for Sk-ChimeraOS.",

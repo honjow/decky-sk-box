@@ -3,15 +3,15 @@ import {
   PanelSection,
   PanelSectionRow,
   ToggleField,
-} from "decky-frontend-lib";
+} from "@decky/ui";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
-import { VFC, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Backend, Settings, SteamUtils } from "../backend";
 import { ActionButtonItem } from ".";
 import { useAdvance } from "../hooks";
 
 
-export const AdvanceComponent: VFC = () => {
+export const AdvanceComponent: FC = () => {
   const [showAdvance, setShowAdvance] = useState<boolean>(Settings.showAdvance);
   const [swapfileMaking, setSwapfileMaking] = useState<boolean>(Settings.swapfileMaking);
 

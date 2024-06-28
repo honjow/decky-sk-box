@@ -7,13 +7,13 @@ import {
   PanelSection,
   PanelSectionRow,
   showModal,
-} from "decky-frontend-lib";
-import { VFC, useState } from "react";
+} from "@decky/ui";
+import { FC, useState } from "react";
 import { Backend, MotionPoint, Settings } from "../backend";
 import { ActionButtonItem } from ".";
 
 
-export const ToolComponent: VFC = () => {
+export const ToolComponent: FC = () => {
   const [showBootToWindows, _] = useState<boolean>(Settings.showBootToWindows);
 
   const bootToWindows = async () => {
@@ -55,7 +55,7 @@ export interface BootToWinModalProps {
   closeModal?: () => void;
 }
 
-export const BootToWinModal: VFC<BootToWinModalProps> = ({ closeModal }) => {
+export const BootToWinModal: FC<BootToWinModalProps> = ({ closeModal }) => {
   return (
     <ModalRoot closeModal={closeModal}>
       <div>
@@ -82,7 +82,7 @@ export interface AddSteamLibraryModalProps {
 }
 
 
-export const AddSteamLibraryModal: VFC<AddSteamLibraryModalProps> = ({ closeModal, mountpoints }) => {
+export const AddSteamLibraryModal: FC<AddSteamLibraryModalProps> = ({ closeModal, mountpoints }) => {
   return (
     <ModalRoot closeModal={closeModal}>
       <div>
@@ -114,7 +114,7 @@ interface MountpointInfiModelProps {
   closeModal?: () => void;
 }
 
-export const MountpointInfiModel: VFC<MountpointInfiModelProps> = ({ mountpoint, closeModal }) => {
+export const MountpointInfiModel: FC<MountpointInfiModelProps> = ({ mountpoint, closeModal }) => {
   return (
     <ModalRoot closeModal={closeModal} onCancel={closeModal} onEscKeypress={closeModal}>
       <div>

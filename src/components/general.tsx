@@ -5,15 +5,15 @@ import {
   PanelSection,
   PanelSectionRow,
   ToggleField
-} from "decky-frontend-lib";
+} from "@decky/ui";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
-import { VFC, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Settings, SleepMode, defaultDelay, delayList } from "../backend";
 import { useGeneral } from "../hooks";
 import { SlowSliderField } from ".";
 
 
-export const GeneralComponent: VFC = () => {
+export const GeneralComponent: FC = () => {
   const [showSwitch, setShowSwitch] = useState<boolean>(Settings.showSwitch);
 
   const {
@@ -120,6 +120,7 @@ export const GeneralComponent: VFC = () => {
         </PanelSectionRow>}
         <PanelSectionRow>
           <SlowSliderField
+            // @ts-ignore
             label={'睡眠模式'}
             description={'选择睡眠模式, 睡眠是默认选择。休眠是将系统状态保存到硬盘，再关机，速度较慢。睡眠后休眠 是先睡眠，在达到设置的时间后自动休眠，但是部分设备上可能存在问题'}
             value={modeToNumber(sleepMode)}

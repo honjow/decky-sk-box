@@ -2,7 +2,7 @@ import os
 from config import logging
 import urllib.parse
 import subprocess
-import decky_plugin
+import decky
 
 
 def urlencode(arg):
@@ -10,7 +10,7 @@ def urlencode(arg):
 
 
 def send_to_steamcmd(steam_command: str, arg: str):
-    user_home = decky_plugin.DECKY_USER_HOME
+    user_home = decky.DECKY_USER_HOME
     try:
         encoded = urlencode(arg)
         steam_running = (

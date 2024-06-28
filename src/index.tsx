@@ -1,9 +1,8 @@
 import {
   definePlugin,
-  ServerAPI,
   staticClasses,
-} from "decky-frontend-lib";
-import { VFC } from "react";
+} from "@decky/ui";
+import { FC } from "react";
 import { FaDemocrat } from "react-icons/fa";
 import {
   AdvanceComponent,
@@ -14,7 +13,7 @@ import {
 } from "./components";
 import { PluginManager } from "./backend";
 
-const Content: VFC<{}> = () => {
+const Content: FC<{}> = () => {
 
   return (
     <>
@@ -27,8 +26,8 @@ const Content: VFC<{}> = () => {
   );
 };
 
-export default definePlugin((serverApi: ServerAPI) => {
-  PluginManager.register(serverApi);
+export default definePlugin(() => {
+  PluginManager.register();
 
   return {
     title: <div className={staticClasses.Title}>SK Box</div>,

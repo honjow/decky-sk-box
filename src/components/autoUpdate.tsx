@@ -3,14 +3,14 @@ import {
   PanelSection,
   PanelSectionRow,
   ToggleField
-} from "decky-frontend-lib";
+} from "@decky/ui";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
-import { VFC, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Settings } from "../backend";
 import { useAutoUpdate } from "../hooks";
 
 
-export const AutoUpdateComponent: VFC = () => {
+export const AutoUpdateComponent: FC = () => {
   const [showAutoUpdate, setShowAutoUpdate] = useState<boolean>(Settings.showAutoUpdate);
 
   const {

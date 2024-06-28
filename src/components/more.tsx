@@ -1,10 +1,10 @@
-import { Field, PanelSection, PanelSectionRow } from "decky-frontend-lib";
-import { VFC } from "react";
+import { Field, PanelSection, PanelSectionRow } from "@decky/ui";
 import { Backend } from "../backend";
 import { useUpdate } from "../hooks";
 import { ActionButtonItem } from ".";
+import { FC } from "react";
 
-export const MoreComponent: VFC = () => {
+export const MoreComponent: FC = () => {
     const { currentVersion, latestVersion, addonVersion, sktVersion } = useUpdate();
 
     let uptButtonText = "重新安装插件";

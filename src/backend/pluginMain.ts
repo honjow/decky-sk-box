@@ -1,11 +1,9 @@
-import { ServerAPI } from "decky-frontend-lib";
 import { Backend, Settings } from ".";
 
 
 export class PluginManager {
-  public static register = async (serverAPI: ServerAPI) => {
-    // await LocalizationManager.init(serverAPI);
-    await Backend.init(serverAPI);
+  public static register = async () => {
+    await Backend.init();
     await Settings.init();
   };
   public static unregister() {}

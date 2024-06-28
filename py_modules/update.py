@@ -8,7 +8,7 @@ import subprocess
 import urllib.request
 
 from config import logging
-import decky_plugin
+import decky
 from utils import recursive_chmod
 
 api_url = "http://api.github.com/repos/honjow/decky-sk-box/releases/latest"
@@ -18,7 +18,7 @@ def update_latest():
     downloaded_filepath = download_latest_build()
 
     if os.path.exists(downloaded_filepath):
-        plugin_dir = f"{decky_plugin.DECKY_USER_HOME}/homebrew/plugins/decky-sk-box"
+        plugin_dir = f"{decky.DECKY_USER_HOME}/homebrew/plugins/decky-sk-box"
 
         try:
             logging.info(f"removing old plugin from {plugin_dir}")
@@ -35,14 +35,14 @@ def update_latest():
             # extract files to decky plugins dir
             shutil.unpack_archive(
                 downloaded_filepath,
-                f"{decky_plugin.DECKY_USER_HOME}/homebrew/plugins",
+                f"{decky.DECKY_USER_HOME}/homebrew/plugins",
                 format="gztar",
             )
 
             # cleanup downloaded files
             os.remove(downloaded_filepath)
         except Exception as e:
-            decky_plugin.logger.error(f"error during ota file extraction {e}")
+            decky.logger.error(f"error during ota file extraction {e}")
 
         logging.info("restarting plugin_loader.service")
         cmd = "systemctl restart plugin_loader.service"
