@@ -82,7 +82,17 @@ def get_package_version(package_name):
 
 
 # 检查服务是否已启用
-def check_service_autostart(service_name):
+def service_is_enabled(service_name):
+    status = get_service_enable_satus(service_name)
+    return status == "enabled"
+
+
+def service_is_masked(service_name):
+    status = get_service_enable_satus(service_name)
+    return status == "masked"
+
+
+def get_service_enable_satus(service_name) -> str:
     try:
         result = subprocess.run(
             f"sudo systemctl is-enabled {service_name}",
@@ -93,14 +103,17 @@ def check_service_autostart(service_name):
             stdout=subprocess.PIPE,
         )
         stdout = result.stdout.strip()
-        logging.info(f"检查服务 {service_name} 是否已启用: {stdout}")
-        return stdout == "enabled"
+        logging.info(f"检查服务 {service_name} 启用状态: {stdout}")
+        return stdout
     except subprocess.CalledProcessError as e:
         logging.error(
             f"检查服务 {service_name} 是否已启用失败, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
         )
         # 如果命令执行出错，则服务可能不存在或无法访问
-        return False
+        return ""
+    except Exception as e:
+        logging.error(f"检查服务 {service_name} 是否已启用失败: {e}", exc_info=True)
+        return ""
 
 
 def check_service_active(service_name):
@@ -131,7 +144,7 @@ def check_service_exists(service_name):
 
         logging.info(f"check {service_name}\nstderr = {stderr}\nstdout = {stdout}")
 
-        return not "Could not find unit" in stderr and not "Loaded: not-found" in stdout
+        return "Could not find unit" not in stderr and "Loaded: not-found" not in stdout
     except subprocess.CalledProcessError as e:
         logging.error(
             f"服务 {service_name} 不存在或无法访问: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
@@ -151,6 +164,26 @@ def toggle_service(service_name, enable):
         )
     except Exception as e:
         logging.error(f"服务 {service_name} {action}失败: {e}")
+
+
+def toggle_service_mask(service_name, isMask):
+    current_status = get_service_enable_satus(service_name)
+    if isMask and current_status != "masked":
+        sudo_cmd = ["sudo", "systemctl", "mask", service_name]
+    elif not isMask and current_status == "masked":
+        sudo_cmd = ["sudo", "systemctl", "unmask", service_name]
+    else:
+        logging.info(f"服务 {service_name} 已经是 {current_status}")
+        return
+    try:
+        subprocess.run(sudo_cmd, check=True)
+        logging.info(f"服务 {service_name} {sudo_cmd[2]}成功")
+    except subprocess.CalledProcessError as e:
+        logging.error(
+            f"服务 {service_name} {sudo_cmd[2]}失败: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
+        )
+    except Exception as e:
+        logging.error(f"服务 {service_name} {sudo_cmd[2]}失败: {e}", exc_info=True)
 
 
 def check_decky_plugin_exists(plugin_name):
@@ -209,7 +242,7 @@ def get_sleep_mode() -> SleepMode:
                 if suspend_then_hibernate_content in line:
                     return SleepMode.SUSPEND_THEN_HIBERNATE
     except Exception:
-        logging.error(f"获取休眠类型失败", exc_info=True)
+        logging.error("获取休眠类型失败", exc_info=True)
         return SleepMode.SUSPEND
     return SleepMode.SUSPEND
 
@@ -273,7 +306,7 @@ def chk_override_bitrate():
     try:
         with open(file_path, "r") as file:
             content = file.read()
-            return not '--["audio.format"]' in content
+            return '--["audio.format"]' not in content
     except FileNotFoundError:
         return False
 
@@ -392,7 +425,7 @@ def get_github_clone_cdn():
     # random select one
     cdn = cdn_list[random.randint(0, len(cdn_list) - 1)]
     logging.info(f"github clone cdn: {cdn}")
-    if not cdn is None:
+    if cdn is not None:
         clear_cache()
     return cdn
 
@@ -404,7 +437,7 @@ def get_github_release_cdn():
     # random select one
     cdn = cdn_list[random.randint(0, len(cdn_list) - 1)]
     logging.info(f"github release cdn: {cdn}")
-    if not cdn is None:
+    if cdn is not None:
         clear_cache()
     return cdn
 
@@ -416,7 +449,7 @@ def get_github_raw_cdn():
     # random select one
     cdn = cdn_list[random.randint(0, len(cdn_list) - 1)]
     logging.info(f"github raw cdn: {cdn}")
-    if not cdn is None:
+    if cdn is not None:
         clear_cache()
     return cdn
 
@@ -543,3 +576,13 @@ def boot_umaf():
 def boot_bios():
     command = "sudo systemctl reboot --firmware-setup"
     return run_command(command, "启动BIOS")
+
+
+def toggle_handheld_service(service_name, enable: bool):
+    all_services = ["handycon.service", "inputplumber.service", f"hhd@{USER}.service"]
+    for service in all_services:
+            _mask = enable and service != service_name
+            _enable = enable and service == service_name
+            logging.info(f"service: {service}, mask: {_mask}, enable: {_enable}")
+            toggle_service_mask(service, _mask)
+            toggle_service(service, _enable)

@@ -50,17 +50,11 @@ class Plugin:
         return utils.set_usb_wakeup(enabled)
 
     async def get_handycon_enabled(self):
-        return utils.check_service_autostart("handycon.service")
+        return utils.service_is_enabled("handycon.service")
 
     async def set_handycon_enabled(self, enabled: bool):
         try:
-            if enabled:
-                try:
-                    utils.toggle_service(f"hhd@{USER}.service", False)
-                    utils.toggle_service("inputplumber.service", False)
-                except Exception as e:
-                    logging.error(f"Error setting HHD/InputPlumber disabled: {e}")
-            utils.toggle_service("handycon.service", enabled)
+            utils.toggle_handheld_service("handycon.service", enabled)
             return True
         except Exception as e:
             logging.error(f"Error setting HandyCon enabled: {e}")
@@ -68,38 +62,26 @@ class Plugin:
 
     # get_inputplumber_enabled
     async def get_inputplumber_enabled(self):
-        return utils.check_service_autostart("inputplumber.service")
+        return utils.service_is_enabled("inputplumber.service")
 
     # set_inputplumber_enabled
     async def set_inputplumber_enabled(self, enabled: bool):
         try:
-            if enabled:
-                try:
-                    utils.toggle_service(f"hhd@{USER}.service", False)
-                    utils.toggle_service("handycon.service", False)
-                except Exception as e:
-                    logging.error(f"Error setting HHD/HandyCon disabled: {e}")
-            utils.toggle_service("inputplumber.service", enabled)
+            utils.toggle_handheld_service("inputplumber.service", enabled)
             return True
         except Exception as e:
             logging.error(f"Error setting Input Plumber enabled: {e}")
             return False
 
     async def get_hhd_enabled(self):
-        return utils.check_service_autostart(f"hhd@{USER}.service")
+        return utils.service_is_enabled(f"hhd@{USER}.service")
 
     async def set_hhd_enabled(self, enabled: bool):
         try:
-            if enabled:
-                try:
-                    utils.toggle_service("handycon.service", False)
-                    utils.toggle_service("inputplumber.service", False)
-                except Exception as e:
-                    logging.error(f"Error setting HandyCon/InputPlumber disabled: {e}")
-            utils.toggle_service(f"hhd@{USER}.service", enabled)
+            utils.toggle_handheld_service(f"hhd@{USER}.service", enabled)
             return True
         except Exception as e:
-            logging.error(f"Error setting HHD enabled: {e}")
+            logging.error(f"Error setting HHD enabled: {e}", exc_info=True)
             return False
 
     async def hhd_installed(self):
@@ -113,7 +95,7 @@ class Plugin:
 
     async def get_auto_keep_boot_enabled(self):
         try:
-            return utils.check_service_autostart("sk-setup-next-boot.service")
+            return utils.service_is_enabled("sk-setup-next-boot.service")
         except Exception:
             logging.error(f"Error getting Auto Keep Boot enabled", exc_info=True)
             return False
@@ -169,7 +151,7 @@ class Plugin:
             return False
 
     async def get_enable_auto_update(self):
-        return utils.check_service_autostart("sk-chos-tool-autoupdate.timer")
+        return utils.service_is_enabled("sk-chos-tool-autoupdate.timer")
 
     async def set_enable_auto_update(self, enabled: bool):
         logging.info(f"Setting Auto Update enabled: {enabled}")
@@ -332,21 +314,21 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error getting Hibernate delay: {e}")
             return ""
-    
+
     async def support_umaf(self):
         try:
             return utils.support_umaf()
         except Exception as e:
             logging.error(f"Error getting umaf support: {e}")
             return False
-    
+
     async def boot_umaf(self):
         try:
             return utils.boot_umaf()
         except Exception as e:
             logging.error(f"Error booting umaf: {e}")
             return False
-    
+
     async def boot_bios(self):
         try:
             return utils.boot_bios()
