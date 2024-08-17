@@ -10,7 +10,7 @@ def urlencode(arg):
 
 
 def send_to_steamcmd(steam_command: str, arg: str):
-    user_home = decky_plugin.DECKY_USER_HOME
+    # user_home = decky_plugin.DECKY_USER_HOME
     try:
         encoded = urlencode(arg)
         steam_running = (
@@ -31,7 +31,7 @@ def send_to_steamcmd(steam_command: str, arg: str):
                 executable="/bin/bash",
             )
             logging.info(
-                f"Sent URL to steam: steam://{steam_command}/{arg} (steam://{steam_command}/{encoded})"
+                f"Sent URL to steam: steam://{steam_command}/{encoded} (arg: {arg})"
             )
         else:
             logging.error("Steam is not running")
@@ -110,8 +110,19 @@ done
 
 def add_library_folder(mountpoint: str):
     libraryfolder = os.path.join(mountpoint, "SteamLibrary")
-    if not os.path.exists(libraryfolder):
-        # create folder
-        os.makedirs(libraryfolder, exist_ok=True)
+    mkdirsWithUidGid(libraryfolder, 1000, 1000)
     logging.info(f"Adding library folder: {libraryfolder}")
     return send_to_steamcmd("addlibraryfolder", libraryfolder)
+
+def mkdirsWithUidGid(path: str, uid: int, gid: int):
+    try:
+        if os.path.exists(path):
+            os.chown(path, uid, gid)
+            return True
+        else:
+            os.makedirs(path, exist_ok=True)
+            os.chown(path, uid, gid)
+            return True
+    except Exception as e:
+        logging.error(f"Error creating folder: {path}, {e}")
+        return False
