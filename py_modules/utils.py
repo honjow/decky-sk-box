@@ -407,17 +407,6 @@ def set_usb_wakeup(enable):
     logging.info("USB唤醒设置完成")
 
 
-def get_config_value(filename, section, key):
-    config = configparser.ConfigParser()
-    config.read(filename)
-
-    if config.has_section(section) and config.has_option(section, key):
-        value = config.get(section, key)
-        return value
-    else:
-        return None
-
-
 def get_github_clone_cdn():
     config_file = "/etc/sk-chos-tool/github_cdn.conf"
     cdn = get_config_value(config_file, "clone", "server") or ""
