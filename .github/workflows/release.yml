@@ -36,7 +36,7 @@ jobs:
           tar -tzvf decky-sk-box.tar.gz
       
       - name: Publish Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: decky-sk-box
           path: decky-sk-box.tar.gz
