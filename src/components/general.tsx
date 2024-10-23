@@ -82,7 +82,7 @@ export const GeneralComponent: FC = () => {
           }}
           onClick={() => setShowSwitch(!showSwitch)}
         >
-          {showSwitch ? <RiArrowDownSFill /> : <RiArrowUpSFill />}
+          {showSwitch ? <RiArrowUpSFill /> : <RiArrowDownSFill />}
         </ButtonItem>
       </PanelSectionRow>
       {showSwitch && <>

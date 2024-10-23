@@ -42,7 +42,7 @@ export const AutoUpdateComponent: FC = () => {
           }}
           onClick={() => setShowAutoUpdate(!showAutoUpdate)}
         >
-          {showAutoUpdate ? <RiArrowDownSFill /> : <RiArrowUpSFill />}
+          {showAutoUpdate ? <RiArrowUpSFill /> : <RiArrowDownSFill />}
         </ButtonItem>
       </PanelSectionRow>
       {showAutoUpdate && <>

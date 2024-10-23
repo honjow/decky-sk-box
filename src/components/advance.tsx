@@ -89,7 +89,7 @@ export const AdvanceComponent: FC = () => {
           }}
           onClick={() => setShowAdvance(!showAdvance)}
         >
-          {showAdvance ? <RiArrowDownSFill /> : <RiArrowUpSFill />}
+          {showAdvance ? <RiArrowUpSFill /> : <RiArrowDownSFill />}
         </ButtonItem>
       </PanelSectionRow>
       {showAdvance && <>
