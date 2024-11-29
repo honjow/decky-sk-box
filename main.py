@@ -335,6 +335,22 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error booting bios: {e}")
             return False
+    
+    # get_product_name
+    async def get_product_name(self):
+        try:
+            return utils.get_product_name()
+        except Exception as e:
+            logging.error(f"Error getting product name: {e}")
+            return ""
+        
+    # get_vendor_name
+    async def get_vendor_name(self):
+        try:
+            return utils.get_vendor_name()
+        except Exception as e:
+            logging.error(f"Error getting vendor name: {e}")
+            return ""
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):

@@ -312,4 +312,14 @@ export class Backend {
   public static async bootBios() {
     return await call("boot_bios");
   }
+
+  // get_product_name
+  public static async getProductName(): Promise<string> {
+    return (await call("get_product_name")) as string || "";
+  }
+
+  // get_vendor_name
+  public static async getVendorName(): Promise<string> {
+    return (await call("get_vendor_name")) as string || "";
+  }
 }

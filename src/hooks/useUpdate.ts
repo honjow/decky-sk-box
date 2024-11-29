@@ -15,6 +15,9 @@ export const useUpdate = () => {
   );
   const [sktVersion, setSktVersion] = useState<string>(Settings.sktVersion);
 
+  const [productName, setProductName] = useState<string>(Settings.productName);
+  const [vendorName, setVendorName] = useState<string>(Settings.vendorName);
+
   useEffect(() => {
     const getData = async () => {
       const latestVersion = await Backend.getLatestVersion();
@@ -51,5 +54,23 @@ export const useUpdate = () => {
     getData();
   });
 
-  return { currentVersion, latestVersion, addonVersion, sktVersion };
+  useEffect(() => {
+    const getData = async () => {
+      const productName = await Backend.getProductName();
+      setProductName(productName);
+      Settings.productName = productName;
+    };
+    getData();
+  });
+
+  useEffect(() => {
+    const getData = async () => {
+      const vendorName = await Backend.getVendorName();
+      setVendorName(vendorName);
+      Settings.vendorName = vendorName;
+    };
+    getData();
+  });
+
+  return { currentVersion, latestVersion, addonVersion, sktVersion, productName, vendorName };
 };

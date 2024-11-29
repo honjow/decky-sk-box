@@ -579,3 +579,17 @@ def toggle_handheld_service(service_name, enable: bool):
         logging.info(f"service: {service}, mask: {_mask}, enable: {_enable}")
         toggle_service_mask(service, _mask)
         toggle_service(service, _enable)
+
+def get_product_name():
+    try:
+        with open("/sys/class/dmi/id/product_name") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return ""
+    
+def get_vendor_name():
+    try:
+        with open("/sys/class/dmi/id/sys_vendor") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return ""

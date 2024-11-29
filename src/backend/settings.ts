@@ -86,6 +86,9 @@ export class Settings {
 
   private _supportUmaf: boolean = false;
 
+  private _productName: string = "";
+  private _vendorName: string = "";
+
   private constructor() {
     this._settingsData = new SettingsData();
   }
@@ -403,5 +406,21 @@ export class Settings {
 
   public static set supportUmaf(value: boolean) {
     this._instance._supportUmaf = value;
+  }
+
+  public static get productName(): string {
+    return this._instance._productName;
+  }
+
+  public static set productName(value: string) {
+    this._instance._productName = value;
+  }
+
+  public static get vendorName(): string {
+    return this._instance._vendorName;
+  }
+
+  public static set vendorName(value: string) {
+    this._instance._vendorName = value;
   }
 }
