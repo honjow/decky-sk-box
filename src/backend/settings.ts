@@ -46,381 +46,164 @@ export class SettingsData {
 }
 
 export class Settings {
-  private static _instance: Settings = new Settings();
+  private static _settingsData: SettingsData = new SettingsData();
 
-  private _settingsData: SettingsData;
+  public static enableKeepBoot = false;
+  public static enableHHD = false;
+  public static enableHandyCon = false;
+  public static enableUSBWakeup = false;
+  public static enableHibernate = false;
+  public static enableFirmwareOverride = false;
+  public static enableInputPlumber = false;
 
-  // private _showSwitch: boolean = false;
-  // private _showAdvance: boolean = false;
-  // private _showAutoUpdate: boolean = false;
+  public static hhdInstalled = false;
+  public static handyConInstalled = false;
+  public static inputPlumberInstalled = false;
 
-  private _enableKeepBoot: boolean = false;
-  private _enableHHD: boolean = false;
-  private _enableHandyCon: boolean = false;
-  private _enableUSBWakeup: boolean = false;
-  private _enableHibernate: boolean = false;
-  private _enableFirmwareOverride: boolean = false;
-  private _enableInputPlumber: boolean = false;
+  public static enableAutoUpdate = false;
+  public static enableAutoUpdateHandyGCCS = false;
+  public static enableAutoUpdateHHD = false;
+  public static enableAutoUpdateSkChosTool = false;
 
-  private _hhdInstalled: boolean = false;
-  private _handyConInstalled: boolean = false;
-  private _inputPlumberInstalled: boolean = false;
+  public static swapfileMaking = false;
+  public static showBootToWindows = false;
 
-  private _enableAutoUpdate: boolean = false;
-  private _enableAutoUpdateHandyGCCS: boolean = false;
-  private _enableAutoUpdateHHD: boolean = false;
-  private _enableAutoUpdateSkChosTool: boolean = false;
+  public static currentVersion = "";
+  public static latestVersion = "";
+  public static addonVersion = "";
+  public static sktVersion = "";
 
-  private _swapfileMaking: boolean = false;
+  public static sleepMode = "";
+  public static hibernateDelay = defaultDelay;
 
-  private _showBootToWindows: boolean = false;
+  public static supportUmaf = false;
+  public static productName = "";
+  public static vendorName = "";
 
-  private _currentVersion: string = "";
-  private _latestVersion: string = "";
-
-  private _addonVersion: string = "";
-  private _sktVersion: string = "";
-
-  private _sleepMode: string = "";
-  private _hibernateDelay: string = defaultDelay;
-
-  private _supportUmaf: boolean = false;
-
-  private _productName: string = "";
-  private _vendorName: string = "";
-
-  private constructor() {
-    this._settingsData = new SettingsData();
-  }
+  // 私有构造函数，防止实例化
+  private constructor() {}
 
   private static get settingsData(): SettingsData {
-    return this._instance._settingsData;
+    return this._settingsData;
   }
 
+  // UI settings from SettingsData with special handling
+  static get showSwitch(): boolean {
+    return this.settingsData.showSwitch;
+  }
+
+  static set showSwitch(value: boolean) {
+    this.settingsData.showSwitch = value;
+    this.saveSettingsData();
+  }
+
+  static get showAdvance(): boolean {
+    return this.settingsData.showAdvance;
+  }
+
+  static set showAdvance(value: boolean) {
+    this.settingsData.showAdvance = value;
+    this.saveSettingsData();
+  }
+
+  static get showAutoUpdate(): boolean {
+    return this.settingsData.showAutoUpdate;
+  }
+
+  static set showAutoUpdate(value: boolean) {
+    this.settingsData.showAutoUpdate = value;
+    this.saveSettingsData();
+  }
+
+  // Methods
   public static async loadSettingsData() {
-    const _settingsData = await Backend.getSettings();
-    // console.log(`SettingsData: ${JSON.stringify(_settingsData)}`);
-    this.settingsData.deepCopy(_settingsData);
+    const settingsData = await Backend.getSettings();
+    this.settingsData.deepCopy(settingsData);
   }
 
   public static async saveSettingsData() {
-    // console.log(`SettingsData save: ${JSON.stringify(this.settingsData)}`);
     await Backend.setSettings(this.settingsData);
   }
 
   public static async init() {
     await this.loadSettingsData();
 
-    Backend.getVersion().then((value) => {
-      this._instance._currentVersion = value;
-    });
-
-    Backend.getLatestVersion().then((value) => {
-      this._instance._latestVersion = value;
-    });
-
-    Backend.getPackageVersion("sk-chos-addon").then((value) => {
-      this._instance._addonVersion = value;
-    });
-
-    Backend.getPackageVersion("sk-chos-tool").then((value) => {
-      this._instance._sktVersion = value;
-    });
-
-    Backend.getUsbWakeupEnabled().then((value) => {
-      this._instance._enableUSBWakeup = value;
-    });
-
-    Backend.getHandyConEnabled().then((value) => {
-      this._instance._enableHandyCon = value;
-    });
-
-    Backend.getHHDEnabled().then((value) => {
-      this._instance._enableHHD = value;
-    });
-
-    Backend.getHibernateEnabled().then((value) => {
-      this._instance._enableHibernate = value;
-    });
-
-    Backend.getFirmwareOverrideEnabled().then((value) => {
-      this._instance._enableFirmwareOverride = value;
-    });
-
-    Backend.getAutoKeepBootEnabled().then((value) => {
-      this._instance._enableKeepBoot = value;
-    });
-
-    Backend.getEnableAutoUpdate().then((value) => {
-      this._instance._enableAutoUpdate = value;
-    });
-
-    Backend.getHandyUpdateEnabled().then((value) => {
-      this._instance._enableAutoUpdateHandyGCCS = value;
-    });
-
-    Backend.getHHDUpdateEnabled().then((value) => {
-      this._instance._enableAutoUpdateHHD = value;
-    });
-
-    Backend.getSktUpdateEnabled().then((value) => {
-      this._instance._enableAutoUpdateSkChosTool = value;
-    });
-
-    Backend.getWinBootEntry().then((value) => {
-      if (Boolean(value)) {
-        this._instance._showBootToWindows = true;
-      }
-    });
-
-    Backend.hhdInstalled().then((value) => {
-      this._instance._hhdInstalled = value;
-    });
-
-    Backend.handyconInstalled().then((value) => {
-      this._instance._handyConInstalled = value;
-    });
-
-    Backend.inputplumberInstalled().then((value) => {
-      this._instance._inputPlumberInstalled = value;
-    });
-
-    Backend.getSleepMode().then((value) => {
-      this._instance._sleepMode = value;
-    });
-
-    Backend.getHibernateDelay().then((value) => {
-      if (value === "") {
-        this._instance._hibernateDelay = defaultDelay;
-        Backend.setHibernateDelay(this._instance._hibernateDelay);
-      }
-    });
-  }
-
-  public static get swapfileMaking(): boolean {
-    return this._instance._swapfileMaking;
-  }
-
-  public static set swapfileMaking(value: boolean) {
-    this._instance._swapfileMaking = value;
-  }
-
-  public static get showSwitch(): boolean {
-    return this.settingsData.showSwitch;
-  }
-
-  public static set showSwitch(value: boolean) {
-    this.settingsData.showSwitch = value;
-    this.saveSettingsData();
-  }
-
-  public static get showAdvance(): boolean {
-    return this.settingsData.showAdvance;
-  }
-
-  public static set showAdvance(value: boolean) {
-    this.settingsData.showAdvance = value;
-    this.saveSettingsData();
-  }
-
-  public static get showAutoUpdate(): boolean {
-    return this.settingsData.showAutoUpdate;
-  }
-
-  public static set showAutoUpdate(value: boolean) {
-    this.settingsData.showAutoUpdate = value;
-    this.saveSettingsData();
-  }
-
-  public static get currentVersion(): string {
-    return this._instance._currentVersion;
-  }
-
-  public static set currentVersion(value: string) {
-    this._instance._currentVersion = value;
-  }
-
-  public static get latestVersion(): string {
-    return this._instance._latestVersion;
-  }
-
-  public static set latestVersion(value: string) {
-    this._instance._latestVersion = value;
-  }
-
-  public static get enableKeepBoot(): boolean {
-    return this._instance._enableKeepBoot;
-  }
-
-  public static set enableKeepBoot(value: boolean) {
-    this._instance._enableKeepBoot = value;
-  }
-
-  public static get enableHHD(): boolean {
-    return this._instance._enableHHD;
-  }
-
-  public static set enableHHD(value: boolean) {
-    this._instance._enableHHD = value;
-  }
-
-  public static get enableHandyCon(): boolean {
-    return this._instance._enableHandyCon;
-  }
-
-  public static set enableHandyCon(value: boolean) {
-    this._instance._enableHandyCon = value;
-  }
-
-  public static get enableUSBWakeup(): boolean {
-    return this._instance._enableUSBWakeup;
-  }
-
-  public static set enableUSBWakeup(value: boolean) {
-    this._instance._enableUSBWakeup = value;
-  }
-
-  public static get enableHibernate(): boolean {
-    return this._instance._enableHibernate;
-  }
-
-  public static set enableHibernate(value: boolean) {
-    this._instance._enableHibernate = value;
-  }
-
-  public static get enableFirmwareOverride(): boolean {
-    return this._instance._enableFirmwareOverride;
-  }
-
-  public static set enableFirmwareOverride(value: boolean) {
-    this._instance._enableFirmwareOverride = value;
-  }
-
-  public static get enableAutoUpdate(): boolean {
-    return this._instance._enableAutoUpdate;
-  }
-
-  public static set enableAutoUpdate(value: boolean) {
-    this._instance._enableAutoUpdate = value;
-  }
-
-  public static get enableAutoUpdateHandyGCCS(): boolean {
-    return this._instance._enableAutoUpdateHandyGCCS;
-  }
-
-  public static set enableAutoUpdateHandyGCCS(value: boolean) {
-    this._instance._enableAutoUpdateHandyGCCS = value;
-  }
-
-  public static get enableAutoUpdateHHD(): boolean {
-    return this._instance._enableAutoUpdateHHD;
-  }
-
-  public static set enableAutoUpdateHHD(value: boolean) {
-    this._instance._enableAutoUpdateHHD = value;
-  }
-
-  public static get enableAutoUpdateSkChosTool(): boolean {
-    return this._instance._enableAutoUpdateSkChosTool;
-  }
-
-  public static set enableAutoUpdateSkChosTool(value: boolean) {
-    this._instance._enableAutoUpdateSkChosTool = value;
-  }
-
-  public static get addonVersion(): string {
-    return this._instance._addonVersion;
-  }
-
-  public static set addonVersion(value: string) {
-    this._instance._addonVersion = value;
-  }
-
-  public static get sktVersion(): string {
-    return this._instance._sktVersion;
-  }
-
-  public static set sktVersion(value: string) {
-    this._instance._sktVersion = value;
-  }
-
-  public static get showBootToWindows(): boolean {
-    return this._instance._showBootToWindows;
-  }
-
-  public static set showBootToWindows(value: boolean) {
-    this._instance._showBootToWindows = value;
-  }
-
-  public static get enableInputPlumber(): boolean {
-    return this._instance._enableInputPlumber;
-  }
-
-  public static set enableInputPlumber(value: boolean) {
-    this._instance._enableInputPlumber = value;
-  }
-
-  public static get hhdInstalled(): boolean {
-    return this._instance._hhdInstalled;
-  }
-
-  public static set hhdInstalled(value: boolean) {
-    this._instance._hhdInstalled = value;
-  }
-
-  public static get handyConInstalled(): boolean {
-    return this._instance._handyConInstalled;
-  }
-
-  public static set handyConInstalled(value: boolean) {
-    this._instance._handyConInstalled = value;
-  }
-
-  public static get inputPlumberInstalled(): boolean {
-    return this._instance._inputPlumberInstalled;
-  }
-
-  public static set inputPlumberInstalled(value: boolean) {
-    this._instance._inputPlumberInstalled = value;
-  }
-
-  public static get sleepMode(): string {
-    return this._instance._sleepMode;
-  }
-
-  public static set sleepMode(value: string) {
-    this._instance._sleepMode = value;
-  }
-
-  public static get hibernateDelay(): string {
-    return this._instance._hibernateDelay;
-  }
-
-  public static set hibernateDelay(value: string) {
-    this._instance._hibernateDelay = value;
-  }
-
-  public static get supportUmaf(): boolean {
-    return this._instance._supportUmaf;
-  }
-
-  public static set supportUmaf(value: boolean) {
-    this._instance._supportUmaf = value;
-  }
-
-  public static get productName(): string {
-    return this._instance._productName;
-  }
-
-  public static set productName(value: string) {
-    this._instance._productName = value;
-  }
-
-  public static get vendorName(): string {
-    return this._instance._vendorName;
-  }
-
-  public static set vendorName(value: string) {
-    this._instance._vendorName = value;
+    const [
+      version,
+      latestVersion,
+      addonVersion,
+      sktVersion,
+      usbWakeup,
+      handyCon,
+      hhd,
+      hibernate,
+      firmwareOverride,
+      keepBoot,
+      autoUpdate,
+      handyUpdateEnabled,
+      hhdUpdateEnabled,
+      sktUpdateEnabled,
+      winBootEntry,
+      hhdInstalled,
+      handyconInstalled,
+      inputplumberInstalled,
+      sleepMode,
+      hibernateDelay
+    ] = await Promise.all([
+      Backend.getVersion(),
+      Backend.getLatestVersion(),
+      Backend.getPackageVersion("sk-chos-addon"),
+      Backend.getPackageVersion("sk-chos-tool"),
+      Backend.getUsbWakeupEnabled(),
+      Backend.getHandyConEnabled(),
+      Backend.getHHDEnabled(),
+      Backend.getHibernateEnabled(),
+      Backend.getFirmwareOverrideEnabled(),
+      Backend.getAutoKeepBootEnabled(),
+      Backend.getEnableAutoUpdate(),
+      Backend.getHandyUpdateEnabled(),
+      Backend.getHHDUpdateEnabled(),
+      Backend.getSktUpdateEnabled(),
+      Backend.getWinBootEntry(),
+      Backend.hhdInstalled(),
+      Backend.handyconInstalled(),
+      Backend.inputplumberInstalled(),
+      Backend.getSleepMode(),
+      Backend.getHibernateDelay()
+    ]);
+
+    // Update versions
+    this.currentVersion = version;
+    this.latestVersion = latestVersion;
+    this.addonVersion = addonVersion;
+    this.sktVersion = sktVersion;
+
+    // Update system settings
+    this.enableKeepBoot = keepBoot;
+    this.enableHHD = hhd;
+    this.enableHandyCon = handyCon;
+    this.enableUSBWakeup = usbWakeup;
+    this.enableHibernate = hibernate;
+    this.enableFirmwareOverride = firmwareOverride;
+
+    // Update installation status
+    this.hhdInstalled = hhdInstalled;
+    this.handyConInstalled = handyconInstalled;
+    this.inputPlumberInstalled = inputplumberInstalled;
+
+    // Update auto-update settings
+    this.enableAutoUpdate = autoUpdate;
+    this.enableAutoUpdateHandyGCCS = handyUpdateEnabled;
+    this.enableAutoUpdateHHD = hhdUpdateEnabled;
+    this.enableAutoUpdateSkChosTool = sktUpdateEnabled;
+
+    // Update other settings
+    this.showBootToWindows = Boolean(winBootEntry);
+    this.sleepMode = sleepMode;
+
+    if (!hibernateDelay) {
+      this.hibernateDelay = defaultDelay;
+      Backend.setHibernateDelay(defaultDelay);
+    }
   }
 }
