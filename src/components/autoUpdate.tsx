@@ -15,11 +15,11 @@ export const AutoUpdateComponent: FC = () => {
 
   const {
     enableAutoUpdate,
-    enableAutoUpdateHandyGCCS,
+    // enableAutoUpdateHandyGCCS,
     enableAutoUpdateHHD,
     enableAutoUpdateSkChosTool,
     updateAutoUpdate,
-    updateAutoUpdateHandyGCCS,
+    // updateAutoUpdateHandyGCCS,
     updateAutoUpdateHHD,
     updateAutoUpdateSkChosTool,
   } = useAutoUpdate();
@@ -62,13 +62,13 @@ export const AutoUpdateComponent: FC = () => {
               onChange={updateAutoUpdateHHD}
             />
           </PanelSectionRow>
-          <PanelSectionRow>
+          {/* <PanelSectionRow>
             <ToggleField
               label={"自动更新 HandyGCCS"}
               checked={enableAutoUpdateHandyGCCS}
               onChange={updateAutoUpdateHandyGCCS}
             />
-          </PanelSectionRow>
+          </PanelSectionRow> */}
           <PanelSectionRow>
             <ToggleField
               label={"自动更新 Sk-ChimeraOS 工具"}
