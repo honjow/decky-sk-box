@@ -2,16 +2,22 @@
 # coding=utf-8
 
 import configparser
+import glob
 import os
 import pwd
 import queue
 import random
 import subprocess
-import glob
 import threading
 
-from config import HIBERNATE_DELAY_FILE, logging, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME
+from config import HIBERNATE_DELAY_FILE, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME, logger
 from py_enum import SleepMode
+
+
+def get_env():
+    env = os.environ.copy()
+    env["LD_LIBRARY_PATH"] = ""
+    return env
 
 
 # 执行命令
@@ -19,7 +25,7 @@ def run_command(command, name=""):
     success = True
     ret_msg = ""
     stderr_queue = queue.Queue()  # 创建一个队列来存储stderr的内容
-    logging.debug(f"执行{name}操作")
+    logger.debug(f"执行{name}操作")
     try:
         process = subprocess.Popen(
             command,
@@ -27,12 +33,13 @@ def run_command(command, name=""):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
+            env=get_env(),
         )
 
         def reader_thread(process, stream_name):
             stream = getattr(process, stream_name)
             for line in iter(stream.readline, ""):
-                logging.info(line.strip())
+                logger.info(line.strip())
                 if stream_name == "stderr":  # 如果是读取stderr，那么将内容添加到队列中
                     while not stderr_queue.empty():  # 清空队列
                         stderr_queue.get()
@@ -47,12 +54,12 @@ def run_command(command, name=""):
             success = False
             if not stderr_queue.empty():  # 从队列中获取stderr的内容
                 ret_msg = stderr_queue.get()
-            logging.error(f"{name}操作失败: {ret_msg}")
+            logger.error(f"{name}操作失败: {ret_msg}")
 
     except Exception as e:
         success = False
         ret_msg = str(e)
-        logging.error(f"{name}操作失败: {ret_msg}")
+        logger.error(f"{name}操作失败: {ret_msg}")
 
     return success, ret_msg
 
@@ -67,6 +74,7 @@ def get_package_version(package_name):
             check=True,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            env=get_env(),
         )
 
         # 获取输出中的版本号部分
@@ -75,7 +83,7 @@ def get_package_version(package_name):
         return version
     except subprocess.CalledProcessError as e:
         # return f"Error: Package '{package_name}' not found"
-        logging.error(
+        logger.error(
             f"获取包版本失败: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
         )
         return ""
@@ -101,31 +109,34 @@ def get_service_enable_satus(service_name) -> str:
             check=False,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            env=get_env(),
         )
         stdout = result.stdout.strip()
-        logging.info(f"检查服务 {service_name} 启用状态: {stdout}")
+        logger.info(f"检查服务 {service_name} 启用状态: {stdout}")
         return stdout
     except subprocess.CalledProcessError as e:
-        logging.error(
+        logger.error(
             f"检查服务 {service_name} 是否已启用失败, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
         )
         # 如果命令执行出错，则服务可能不存在或无法访问
         return ""
     except Exception as e:
-        logging.error(f"检查服务 {service_name} 是否已启用失败: {e}", exc_info=True)
+        logger.error(f"检查服务 {service_name} 是否已启用失败: {e}", exc_info=True)
         return ""
 
 
 def check_service_active(service_name):
     try:
         output = (
-            subprocess.check_output(["sudo", "systemctl", "is-active", service_name])
+            subprocess.check_output(
+                ["sudo", "systemctl", "is-active", service_name], env=get_env()
+            )
             .decode()
             .strip()
         )
         return output == "active"
     except subprocess.CalledProcessError as e:
-        logging.error(
+        logger.error(
             f"服务 {service_name} 不存在或无法访问: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
         )
         return False
@@ -138,15 +149,16 @@ def check_service_exists(service_name):
             capture_output=True,
             text=True,
             check=False,
+            env=get_env(),
         )
         stderr = output.stderr.strip()
         stdout = output.stdout.strip()
 
-        logging.info(f"check {service_name}\nstderr = {stderr}\nstdout = {stdout}")
+        logger.info(f"check {service_name}\nstderr = {stderr}\nstdout = {stdout}")
 
         return "Could not find unit" not in stderr and "Loaded: not-found" not in stdout
     except subprocess.CalledProcessError as e:
-        logging.error(
+        logger.error(
             f"服务 {service_name} 不存在或无法访问: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
         )
         return False
@@ -157,13 +169,13 @@ def toggle_service(service_name, enable):
     try:
         sudo_cmd = ["sudo", "systemctl", action, "--now", service_name]
         subprocess.run(sudo_cmd, check=True)
-        logging.info(f"服务 {service_name} {action}成功")
+        logger.info(f"服务 {service_name} {action}成功")
     except subprocess.CalledProcessError as e:
-        logging.error(
+        logger.error(
             f"服务 {service_name} {action}失败: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
         )
     except Exception as e:
-        logging.error(f"服务 {service_name} {action}失败: {e}")
+        logger.error(f"服务 {service_name} {action}失败: {e}")
 
 
 def toggle_service_mask(service_name, isMask):
@@ -173,24 +185,24 @@ def toggle_service_mask(service_name, isMask):
     elif not isMask and current_status == "masked":
         sudo_cmd = ["sudo", "systemctl", "unmask", service_name]
     else:
-        logging.info(f"服务 {service_name} 已经是 {current_status}")
+        logger.info(f"服务 {service_name} 已经是 {current_status}")
         return
     try:
         subprocess.run(sudo_cmd, check=True)
-        logging.info(f"服务 {service_name} {sudo_cmd[2]}成功")
+        logger.info(f"服务 {service_name} {sudo_cmd[2]}成功")
     except subprocess.CalledProcessError as e:
-        logging.error(
+        logger.error(
             f"服务 {service_name} {sudo_cmd[2]}失败: {e}, cmd: {e.cmd}, out: {e.stdout}, err: {e.stderr}"
         )
     except Exception as e:
-        logging.error(f"服务 {service_name} {sudo_cmd[2]}失败: {e}", exc_info=True)
+        logger.error(f"服务 {service_name} {sudo_cmd[2]}失败: {e}", exc_info=True)
 
 
 def check_decky_plugin_exists(plugin_name):
     exists = os.path.isfile(
         os.path.expanduser(f"~/homebrew/plugins/{plugin_name}/plugin.json")
     )
-    logging.debug(f"检查插件 {plugin_name} 是否存在: {exists}")
+    logger.debug(f"检查插件 {plugin_name} 是否存在: {exists}")
     return exists
 
 
@@ -242,13 +254,13 @@ def get_sleep_mode() -> SleepMode:
                 if suspend_then_hibernate_content in line:
                     return SleepMode.SUSPEND_THEN_HIBERNATE
     except Exception:
-        logging.error("获取休眠类型失败", exc_info=True)
+        logger.error("获取休眠类型失败", exc_info=True)
         return SleepMode.SUSPEND
     return SleepMode.SUSPEND
 
 
 def set_sleep_mode(sleep_mode: SleepMode):
-    logging.info(f"设置睡眠类型: {sleep_mode}")
+    logger.info(f"设置睡眠类型: {sleep_mode}")
     if sleep_mode == SleepMode.HIBERNATE:
         run_command(
             "sudo cp /lib/systemd/system/systemd-hibernate.service /etc/systemd/system/systemd-suspend.service"
@@ -264,7 +276,7 @@ def set_sleep_mode(sleep_mode: SleepMode):
 
 
 def set_hibernate_delay(timeout: str):
-    logging.info(f"设置 hibernate_delay: {timeout}")
+    logger.info(f"设置 hibernate_delay: {timeout}")
     file_path = HIBERNATE_DELAY_FILE
     if not os.path.isfile(file_path):
         run_command("sudo mkdir -p /etc/systemd/sleep.conf.d")
@@ -398,13 +410,13 @@ def set_usb_wakeup(enable):
     enable_str = "USB_WAKE_ENABLED=1"
     disable_str = "USB_WAKE_ENABLED=0"
     if enable:
-        logging.info("开启USB唤醒")
+        logger.info("开启USB唤醒")
         run_command(f"sudo sed -i 's/{disable_str}/{enable_str}/g' {conf_path}")
     else:
-        logging.info("关闭USB唤醒")
+        logger.info("关闭USB唤醒")
         run_command(f"sudo sed -i 's/{enable_str}/{disable_str}/g' {conf_path}")
     run_command("sudo frzr-tweaks")
-    logging.info("USB唤醒设置完成")
+    logger.info("USB唤醒设置完成")
 
 
 def get_github_clone_cdn():
@@ -413,7 +425,7 @@ def get_github_clone_cdn():
     cdn_list = cdn.split(":::")
     # random select one
     cdn = cdn_list[random.randint(0, len(cdn_list) - 1)]
-    logging.info(f"github clone cdn: {cdn}")
+    logger.info(f"github clone cdn: {cdn}")
     if cdn is not None:
         clear_cache()
     return cdn
@@ -425,7 +437,7 @@ def get_github_release_cdn():
     cdn_list = cdn.split(":::")
     # random select one
     cdn = cdn_list[random.randint(0, len(cdn_list) - 1)]
-    logging.info(f"github release cdn: {cdn}")
+    logger.info(f"github release cdn: {cdn}")
     if cdn is not None:
         clear_cache()
     return cdn
@@ -437,7 +449,7 @@ def get_github_raw_cdn():
     cdn_list = cdn.split(":::")
     # random select one
     cdn = cdn_list[random.randint(0, len(cdn_list) - 1)]
-    logging.info(f"github raw cdn: {cdn}")
+    logger.info(f"github raw cdn: {cdn}")
     if cdn is not None:
         clear_cache()
     return cdn
@@ -500,7 +512,7 @@ def get_autoupdate_config(key):
     config_file = f"{conf_dir}/autoupdate.conf"
     section = "autoupdate"
     value = get_config_value(config_file, section, key)
-    logging.debug(f">>>>> get_autoupdate_config: {key} = {value}")
+    logger.debug(f">>>>> get_autoupdate_config: {key} = {value}")
     if value is None:
         value = "true"
         set_autoupdate_config(key, value)
@@ -519,14 +531,14 @@ def set_autoupdate_config(key, value):
 
 def set_autoupdate(pkg_name, enable):
     key = f"autoupdate.{pkg_name}"
-    logging.info(f"set_autoupdate: {pkg_name} = {enable}")
+    logger.info(f"set_autoupdate: {pkg_name} = {enable}")
     set_autoupdate_config(key, str(enable).lower())
 
 
 def get_autoupdate(pkg_name):
     key = f"autoupdate.{pkg_name}"
     value = get_autoupdate_config(key)
-    logging.info(f"get_autoupdate: {pkg_name} = {value}")
+    logger.info(f"get_autoupdate: {pkg_name} = {value}")
     return value == "true"
 
 
@@ -576,12 +588,13 @@ def toggle_handheld_service(service_name, enable: bool):
         else:
             _mask = True
             _enable = False
-        logging.info(f"service: {service}, mask: {_mask}, enable: {_enable}")
+        logger.info(f"service: {service}, mask: {_mask}, enable: {_enable}")
         toggle_service_mask(service, _mask)
         toggle_service(service, _enable)
         # steam-powerbuttond 服务跟随 inputplumber.service 开启或关闭
         if service == "inputplumber.service":
             toggle_service("steam-powerbuttond.service", _enable)
+
 
 def get_product_name():
     try:
@@ -589,7 +602,8 @@ def get_product_name():
             return f.read().strip()
     except FileNotFoundError:
         return ""
-    
+
+
 def get_vendor_name():
     try:
         with open("/sys/class/dmi/id/sys_vendor") as f:

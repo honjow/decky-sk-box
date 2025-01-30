@@ -1,7 +1,7 @@
-import os
 import subprocess
 
-from config import logging
+from config import logger
+from utils import get_env
 
 
 # 存在 win 启动项
@@ -15,8 +15,9 @@ def get_win_boot():
             stderr=subprocess.PIPE,
             text=True,
             check=True,
+            env=get_env(),
         )
-        logging.info(
+        logger.info(
             f"get windows boot number success, command: [{command}], stdout: {result.stdout}"
         )
         if not result.stdout:
@@ -27,10 +28,10 @@ def get_win_boot():
         if stdout.endswith("*"):
             stdout = stdout[:-1]
 
-        logging.info(f"windows boot number: {stdout}")
+        logger.info(f"windows boot number: {stdout}")
         return stdout
     except subprocess.CalledProcessError as e:
-        logging.error(
+        logger.error(
             f"Error: {e}, command: {command}, stdout: {e.stdout}, stderr: {e.stderr}"
         )
     return ""
@@ -48,8 +49,9 @@ def boot_to_win():
                 stderr=subprocess.PIPE,
                 text=True,
                 check=True,
+                env=get_env(),
             )
-            logging.info(
+            logger.info(
                 f"set next boot to windows success, command: {command}, stdout: {result.stdout}"
             )
             subprocess.run(
@@ -60,10 +62,10 @@ def boot_to_win():
                 capture_output=True,
             )
         except subprocess.CalledProcessError as e:
-            logging.error(
+            logger.error(
                 f"Error: {e}, command: {command}, stdout: {e.stdout}, stderr: {e.stderr}"
             )
     else:
-        logging.error("No windows boot entry found")
+        logger.error("No windows boot entry found")
         return False
     return True

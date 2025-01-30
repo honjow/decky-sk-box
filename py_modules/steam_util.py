@@ -1,8 +1,9 @@
 import os
-from config import logging
-import urllib.parse
 import subprocess
-import decky
+import urllib.parse
+
+from config import logger
+from utils import get_env
 
 
 def urlencode(arg):
@@ -10,12 +11,15 @@ def urlencode(arg):
 
 
 def send_to_steamcmd(steam_command: str, arg: str):
-    user_home = decky.DECKY_USER_HOME
+    # user_home = decky.DECKY_USER_HOME
     try:
+
         encoded = urlencode(arg)
         steam_running = (
             subprocess.run(
-                ["pgrep", "-x", "steam"], stdout=subprocess.DEVNULL
+                ["pgrep", "-x", "steam"],
+                stdout=subprocess.DEVNULL,
+                env=get_env(),
             ).returncode
             == 0
         )
@@ -29,24 +33,25 @@ def send_to_steamcmd(steam_command: str, arg: str):
                 stderr=subprocess.PIPE,
                 shell=True,
                 executable="/bin/bash",
+                env=get_env(),
             )
-            logging.info(
+            logger.info(
                 f"Sent URL to steam: steam://{steam_command}/{encoded} (arg: {arg})"
             )
         else:
-            logging.error("Steam is not running")
+            logger.error("Steam is not running")
             return False
         return True
     except subprocess.CalledProcessError as e:
-        logging.error(
+        logger.error(
             f"Error sending to steamcmd: {e}, stdout: {e.stdout}, stderr: {e.stderr}, cmd: {e.cmd}"
         )
         return False
     except Exception as e:
-        logging.error(f"> Error sending to steamcmd: {e}")
+        logger.error(f"> Error sending to steamcmd: {e}")
         import traceback
 
-        logging.error(traceback.format_exc())
+        logger.error(traceback.format_exc())
         return False
 
 
@@ -78,17 +83,20 @@ done
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             executable="/bin/bash",
+            env=get_env(),
         )
 
         stdout = result.stdout.strip()
-        logging.info(f"get_mountpoint: {stdout}")
+        logger.info(f"get_mountpoint: {stdout}")
         # split to [path mountpoint fstype fssize]
         lines = stdout.split("\n")
         for line in lines:
             path, mountpoint, fstype, fssize, fsvail, parttype_name = line.split(" ")
             if path and mountpoint and fstype and fssize and fsvail and parttype_name:
                 parttype_name = bytes(parttype_name, "utf-8").decode("unicode_escape")
-                logging.info(f"get_mountpoint: {path}, {mountpoint}, {fstype}, {fssize}, {fsvail}, {parttype_name}")
+                logger.info(
+                    f"get_mountpoint: {path}, {mountpoint}, {fstype}, {fssize}, {fsvail}, {parttype_name}"
+                )
                 if fstype == "ntfs" and parttype_name == "Windows recovery environment":
                     continue
                 # dict
@@ -101,18 +109,19 @@ done
                         "fsvail": fsvail,
                     }
                 )
-        logging.info(f"get_mountpoint: {mountpoint_list}")
+        logger.info(f"get_mountpoint: {mountpoint_list}")
         return mountpoint_list
     except subprocess.CalledProcessError as e:
-        logging.error(f"Error getting mountpoint: {e}, {e.stderr}")
+        logger.error(f"Error getting mountpoint: {e}, {e.stderr}")
         return []
 
 
 def add_library_folder(mountpoint: str):
     libraryfolder = os.path.join(mountpoint, "SteamLibrary")
     mkdirsWithUidGid(libraryfolder, 1000, 1000)
-    logging.info(f"Adding library folder: {libraryfolder}")
+    logger.info(f"Adding library folder: {libraryfolder}")
     return send_to_steamcmd("addlibraryfolder", libraryfolder)
+
 
 def mkdirsWithUidGid(path: str, uid: int, gid: int):
     try:
@@ -124,5 +133,5 @@ def mkdirsWithUidGid(path: str, uid: int, gid: int):
             os.chown(path, uid, gid)
             return True
     except Exception as e:
-        logging.error(f"Error creating folder: {path}, {e}")
+        logger.error(f"Error creating folder: {path}, {e}")
         return False
