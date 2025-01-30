@@ -579,6 +579,9 @@ def toggle_handheld_service(service_name, enable: bool):
         logging.info(f"service: {service}, mask: {_mask}, enable: {_enable}")
         toggle_service_mask(service, _mask)
         toggle_service(service, _enable)
+        # steam-powerbuttond 服务跟随 inputplumber.service 开启或关闭
+        if service == "inputplumber.service":
+            toggle_service("steam-powerbuttond.service", _enable)
 
 def get_product_name():
     try:
