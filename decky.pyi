@@ -12,10 +12,9 @@ Some basic migration helpers are available: `migrate_any`, `migrate_settings`, `
 A logging facility `logger` is available which writes to the recommended location.
 """
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"
 
 import logging
-
 from typing import Any
 
 """
@@ -126,7 +125,6 @@ e.g.: `/home/deck/homebrew/logs/decky-plugin-template/plugin.log`
 Migration helpers
 """
 
-
 def migrate_any(target_dir: str, *files_or_directories: str) -> dict[str, str]:
     """
     Migrate files and directories to a new location and remove old locations.
@@ -135,7 +133,6 @@ def migrate_any(target_dir: str, *files_or_directories: str) -> dict[str, str]:
 
     Returns the mapping of old -> new location.
     """
-
 
 def migrate_settings(*files_or_directories: str) -> dict[str, str]:
     """
@@ -146,7 +143,6 @@ def migrate_settings(*files_or_directories: str) -> dict[str, str]:
     Returns the mapping of old -> new location.
     """
 
-
 def migrate_runtime(*files_or_directories: str) -> dict[str, str]:
     """
     Migrate files and directories relating to plugin runtime data to the recommended location and remove old locations
@@ -156,7 +152,6 @@ def migrate_runtime(*files_or_directories: str) -> dict[str, str]:
     Returns the mapping of old -> new location.
     """
 
-
 def migrate_logs(*files_or_directories: str) -> dict[str, str]:
     """
     Migrate files and directories relating to plugin logs to the recommended location and remove old locations.
@@ -165,7 +160,6 @@ def migrate_logs(*files_or_directories: str) -> dict[str, str]:
 
     Returns the mapping of old -> new location.
     """
-
 
 """
 Logging
@@ -177,6 +171,7 @@ logger: logging.Logger
 """
 Event handling
 """
+
 # TODO better docstring im lazy
 async def emit(event: str, *args: Any) -> None:
     """

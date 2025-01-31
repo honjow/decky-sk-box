@@ -31,6 +31,7 @@ jobs:
       - name: build plugin
         run: |
           npm i -g pnpm@8.5.1
+          pnpm up --latest
           pnpm install --no-frozen-lockfile
           pnpm run build
           tar -czvf decky-sk-box.tar.gz --transform 's,^,decky-sk-box/,' dist py_modules *.py *.json *.md *.js LICENSE
