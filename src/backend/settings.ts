@@ -80,6 +80,9 @@ export class Settings {
   public static productName = "";
   public static vendorName = "";
 
+  public static sessionMode = "";
+  public static canSwitchDesktopSession = false;
+
   // 私有构造函数，防止实例化
   private constructor() {}
 
@@ -148,7 +151,9 @@ export class Settings {
       handyconInstalled,
       inputplumberInstalled,
       sleepMode,
-      hibernateDelay
+      sessionMode,
+      hibernateDelay,
+      canSwitchDesktopSession
     ] = await Promise.all([
       Backend.getVersion(),
       Backend.getLatestVersion(),
@@ -169,7 +174,9 @@ export class Settings {
       Backend.handyconInstalled(),
       Backend.inputplumberInstalled(),
       Backend.getSleepMode(),
-      Backend.getHibernateDelay()
+      Backend.getDesktopSession(),
+      Backend.getHibernateDelay(),
+      Backend.canSwitchDesktopSession()
     ]);
 
     // Update versions
@@ -200,6 +207,9 @@ export class Settings {
     // Update other settings
     this.showBootToWindows = Boolean(winBootEntry);
     this.sleepMode = sleepMode;
+
+    this.sessionMode = sessionMode;
+    this.canSwitchDesktopSession = canSwitchDesktopSession;
 
     if (!hibernateDelay) {
       this.hibernateDelay = defaultDelay;

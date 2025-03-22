@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Backend, Settings, SleepMode } from "../backend";
+import { Backend, SessionMode, Settings, SleepMode } from "../backend";
 
 export const useGeneral = () => {
   const [enableKeepBoot, setEnableKeepBoot] = useState(Settings.enableKeepBoot);
@@ -22,8 +22,20 @@ export const useGeneral = () => {
     Settings.inputPlumberInstalled
   );
 
-  const [sleepMode, setSleepMode] = useState<SleepMode>(Settings.sleepMode as SleepMode || SleepMode.SUSPEND);
-  const [hibernateDelay, setHibernateDelay] = useState<string>(Settings.hibernateDelay);
+  const [sleepMode, setSleepMode] = useState<SleepMode>(
+    (Settings.sleepMode as SleepMode) || SleepMode.SUSPEND
+  );
+  const [hibernateDelay, setHibernateDelay] = useState<string>(
+    Settings.hibernateDelay
+  );
+
+  const [sessionMode, setSessionMode] = useState<SessionMode>(
+    (Settings.sessionMode as SessionMode) || SessionMode.XORG
+  );
+
+  const [canSwitchDesktopSession, setCanSwitchDesktopSession] = useState(
+    Settings.canSwitchDesktopSession || false
+  );
 
   useEffect(() => {
     Settings.enableKeepBoot = enableKeepBoot;
@@ -36,6 +48,8 @@ export const useGeneral = () => {
     Settings.handyConInstalled = handyConInstalled;
     Settings.inputPlumberInstalled = inputPlumberInstalled;
     Settings.hibernateDelay = hibernateDelay;
+    Settings.sessionMode = sessionMode;
+    Settings.canSwitchDesktopSession = canSwitchDesktopSession;
   }, [
     enableKeepBoot,
     enableHHD,
@@ -46,8 +60,9 @@ export const useGeneral = () => {
     handyConInstalled,
     inputPlumberInstalled,
     hibernateDelay,
+    sessionMode,
+    canSwitchDesktopSession,
   ]);
-
 
   useEffect(() => {
     const getDate = async () => {
@@ -70,6 +85,11 @@ export const useGeneral = () => {
 
         const _sleepMode = await Backend.getSleepMode();
         const _hibernateDelay = await Backend.getHibernateDelay();
+        const _sessionMode = await Backend.getDesktopSession();
+        console.log(`>>>>> dddd _sessionMode: ${_sessionMode}`);
+
+        const _canSwitchDesktopSession =
+          await Backend.canSwitchDesktopSession();
 
         setEnableKeepBoot(_enableKeepBoot);
         setEnableHHD(_enableHHD);
@@ -80,8 +100,10 @@ export const useGeneral = () => {
         setHHDInstalled(_hhdInstalled);
         setHandyConInstalled(_handyConInstalled);
         setInputPlumberInstalled(_inputPlumberInstalled);
-        setSleepMode(_sleepMode as SleepMode || SleepMode.SUSPEND);
+        setSleepMode((_sleepMode as SleepMode) || SleepMode.SUSPEND);
         setHibernateDelay(_hibernateDelay);
+        setSessionMode((_sessionMode as SessionMode) || SessionMode.XORG);
+        setCanSwitchDesktopSession(_canSwitchDesktopSession);
       } catch (e) {
         console.error(`getDate general error: ${e}`);
       }
@@ -125,7 +147,6 @@ export const useGeneral = () => {
     setEnableInputPlumber(val);
   };
 
-
   const updateHibernate = async (val: boolean) => {
     await Backend.setHibernateEnabled(val);
     Settings.enableHibernate = val;
@@ -138,13 +159,21 @@ export const useGeneral = () => {
       Settings.sleepMode = mode;
       await Backend.setSleepMode(mode);
     }
-  }
+  };
 
   const updateHibernateDelay = async (delay: string) => {
     setHibernateDelay(delay);
     Settings.hibernateDelay = delay;
     await Backend.setHibernateDelay(delay);
-  }
+  };
+
+  const updateSessionMode = async (mode: SessionMode, sendBackend = true) => {
+    setSessionMode(mode);
+    if (sendBackend) {
+      Settings.sessionMode = mode;
+      await Backend.setDesktopSession(mode);
+    }
+  };
 
   return {
     enableKeepBoot,
@@ -162,6 +191,9 @@ export const useGeneral = () => {
     inputPlumberInstalled,
     sleepMode,
     updateSleepMode,
+    sessionMode,
+    updateSessionMode,
+    canSwitchDesktopSession,
     hibernateDelay,
     updateHibernateDelay,
   };

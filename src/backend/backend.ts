@@ -1,5 +1,5 @@
 import { call } from "@decky/api";
-import { SettingsData, SleepMode } from ".";
+import { SessionMode, SettingsData, SleepMode } from ".";
 
 export interface MotionPoint {
   path: string;
@@ -321,5 +321,22 @@ export class Backend {
   // get_vendor_name
   public static async getVendorName(): Promise<string> {
     return (await call("get_vendor_name")) as string || "";
+  }
+
+  // get_desktop_session
+  public static async getDesktopSession(): Promise<SessionMode> {
+    const result = await call("get_desktop_session") as SessionMode;
+    console.log(`get_desktop_session: ${result}`);
+    return result || SessionMode.XORG;
+  }
+
+  // set_desktop_session
+  public static async setDesktopSession(session: SessionMode) {
+    return await call("set_desktop_session", session);
+  }
+
+  // can_switch_desktop_session
+  public static async canSwitchDesktopSession(): Promise<boolean> {
+    return (await call("can_switch_desktop_session")) as boolean;
   }
 }

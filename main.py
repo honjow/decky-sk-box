@@ -7,6 +7,7 @@ import update
 import utils
 import boot_to_win
 import steam_util
+import desktop
 from settings import SettingsManager
 from config import (
     logging,
@@ -351,6 +352,30 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error getting vendor name: {e}")
             return ""
+    
+    # can_switch_desktop_session
+    async def can_switch_desktop_session(self):
+        try:
+            return desktop.can_switch_desktop_session()
+        except Exception as e:
+            logging.error(f"Error checking desktop session switcher: {e}")
+            return False
+
+    # set_desktop_session
+    async def set_desktop_session(self, session: str):
+        try:
+            return desktop.set_desktop_session(session)
+        except Exception as e:
+            logging.error(f"Error setting desktop session: {e}")
+            return False
+
+    # get_desktop_session
+    async def get_desktop_session(self):
+        try:
+            return desktop.get_desktop_session()
+        except Exception as e:
+            logging.error(f"Error getting desktop session: {e}")
+            return "xorg"
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):
