@@ -142,7 +142,7 @@ export const GeneralComponent: FC = () => {
               <ToggleField
                 label={"HHD"}
                 description={
-                  "Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用"
+                  "Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 InputPlumber 同时使用. 请配合HHD Decky插件使用"
                 }
                 checked={enableHHD}
                 onChange={updateHHD}
@@ -163,7 +163,7 @@ export const GeneralComponent: FC = () => {
             <PanelSectionRow>
               <ToggleField
                 label={"InputPlumber"}
-                description={"HandyGCCS 的替代品, 奇美拉官方出品. 控制器驱动"}
+                description={"奇美拉官方系统使用的控制器驱动, 不能和 HHD 同时使用."}
                 checked={enableInputPlumber}
                 onChange={updateInputPlumber}
               />
