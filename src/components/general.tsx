@@ -77,8 +77,8 @@ export const GeneralComponent: FC = () => {
   };
 
   const sessionOptions = [
-    { mode: SessionMode.XORG, label: "Xorg" },
     { mode: SessionMode.WAYLAND, label: "Wayland" },
+    { mode: SessionMode.XORG, label: "Xorg" },
   ];
 
   const sessionModeToNumber = (mode: string) => {
@@ -88,7 +88,7 @@ export const GeneralComponent: FC = () => {
 
   const sessionNumberToMode = (number: number) => {
     console.log(`sessionNumberToMode: ${number}`);
-    return sessionOptions[number].mode || SessionMode.XORG;
+    return sessionOptions[number].mode || SessionMode.WAYLAND;
   };
 
   const sessionNotchLabels: NotchLabel[] = sessionOptions.map((option, idx) => {
@@ -212,7 +212,7 @@ export const GeneralComponent: FC = () => {
               <SlowSliderField
                 // @ts-ignore
                 label={"桌面会话"}
-                description={"为支持的分支提供桌面会话切换功能, Xorg 为默认. Wayland 有更多新特性, 但部分功能支持还不够完善"}
+                description={"为支持的分支提供桌面会话切换功能, Wayland 为默认"}
                 value={sessionModeToNumber(sessionMode)}
                 min={0}
                 max={sessionOptions.length - 1}

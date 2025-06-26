@@ -5,6 +5,6 @@ export enum SleepMode {
 }
 
 export enum SessionMode {
-    XORG = "xorg",
     WAYLAND = "wayland",
+    XORG = "xorg",
 }
