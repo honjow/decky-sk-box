@@ -49,6 +49,8 @@ except Exception as e:
 USER = decky.DECKY_USER
 USER_HOME = decky.DECKY_USER_HOME
 
+ASUS_ALLY_HID_MOD_NAME = "asus_ally_hid"
+
 CONFIG_KEY = "sk-box"
 
 HIBERNATE_DELAY_FILE = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf"

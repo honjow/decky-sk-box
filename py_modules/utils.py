@@ -10,7 +10,14 @@ import random
 import subprocess
 import threading
 
-from config import HIBERNATE_DELAY_FILE, SK_TOOL_SCRIPTS_PATH, USER, USER_HOME, logger
+from config import (
+    ASUS_ALLY_HID_MOD_NAME,
+    HIBERNATE_DELAY_FILE,
+    SK_TOOL_SCRIPTS_PATH,
+    USER,
+    USER_HOME,
+    logger,
+)
 from py_enum import SleepMode
 
 
@@ -168,7 +175,7 @@ def toggle_service(service_name, enable):
     action = "enable" if enable else "disable"
     try:
         sudo_cmd = ["sudo", "systemctl", action, "--now", service_name]
-        subprocess.run(sudo_cmd, check=True)
+        subprocess.run(sudo_cmd, check=True, env=get_env())
         logger.info(f"服务 {service_name} {action}成功")
     except subprocess.CalledProcessError as e:
         logger.error(
@@ -188,7 +195,7 @@ def toggle_service_mask(service_name, isMask):
         logger.info(f"服务 {service_name} 已经是 {current_status}")
         return
     try:
-        subprocess.run(sudo_cmd, check=True)
+        subprocess.run(sudo_cmd, check=True, env=get_env())
         logger.info(f"服务 {service_name} {sudo_cmd[2]}成功")
     except subprocess.CalledProcessError as e:
         logger.error(
@@ -591,9 +598,21 @@ def toggle_handheld_service(service_name, enable: bool):
         logger.info(f"service: {service}, mask: {_mask}, enable: {_enable}")
         toggle_service_mask(service, _mask)
         toggle_service(service, _enable)
-        # steam-powerbuttond 服务跟随 inputplumber.service 开启或关闭
-        if service == "inputplumber.service":
-            toggle_service("steam-powerbuttond.service", _enable)
+        
+        # # steam-powerbuttond 服务跟随 inputplumber.service 开启或关闭
+        # if service == "inputplumber.service":
+        #     toggle_service("steam-powerbuttond.service", _enable)
+
+        # ROG Ally X RC72L 在启用 inputplumber.service 时需要开启 asus_ally_hid 模块.否则需要关闭
+        if service == "inputplumber.service" and "ROG Ally X RC72L" in get_product_name():
+            toggle_mod_enable(ASUS_ALLY_HID_MOD_NAME, _enable)
+
+def toggle_mod_enable(mod_name, enable: bool):
+    run_command("depmod -a")
+    if enable:
+        run_command(f"modprobe {mod_name}")
+    else:
+        run_command(f"modprobe -r {mod_name}")
 
 
 def get_product_name():
