@@ -14,6 +14,7 @@ from config import (
     USER,
     CONFIG_KEY,
 )
+from gpu_manager import GpuManager
 
 
 class Plugin:
@@ -21,6 +22,9 @@ class Plugin:
         self.settings = SettingsManager(
             name="config", settings_directory=decky.DECKY_PLUGIN_SETTINGS_DIR
         )
+        # Initialize GPU manager
+        self.gpu_manager = GpuManager(decky.DECKY_USER_HOME)
+        logging.info("Plugin initialized with GPU manager")
 
     async def get_settings(self):
         return self.settings.getSetting(CONFIG_KEY)
@@ -376,6 +380,35 @@ class Plugin:
         except Exception as e:
             logging.error(f"Error getting desktop session: {e}")
             return "xorg"
+
+    # get_gpu_devices
+    async def get_gpu_devices(self):
+        try:
+            logging.info("Getting GPU devices via GPU manager")
+            return self.gpu_manager.get_gpu_devices()
+        except Exception as e:
+            logging.error(f"Error getting GPU devices: {e}", exc_info=True)
+            return []
+
+    # set_vulkan_adapter
+    async def set_vulkan_adapter(self, device_id: str):
+        try:
+            logging.info(f"Setting Vulkan adapter via GPU manager: {device_id}")
+            return self.gpu_manager.set_vulkan_adapter(device_id)
+        except Exception as e:
+            logging.error(f"Error setting Vulkan adapter: {e}", exc_info=True)
+            return False
+
+    # get_current_vulkan_adapter
+    async def get_current_vulkan_adapter(self):
+        try:
+            logging.info("Getting current Vulkan adapter via GPU manager")
+            return self.gpu_manager.get_current_vulkan_adapter()
+        except Exception as e:
+            logging.error(f"Error getting current Vulkan adapter: {e}", exc_info=True)
+            return ""
+
+
 
     # Migrations that should be performed before entering `_main()`.
     async def _migration(self):

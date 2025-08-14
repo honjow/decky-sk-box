@@ -1,5 +1,5 @@
 import { call } from "@decky/api";
-import { SessionMode, SettingsData, SleepMode } from ".";
+import { GpuDevice, SessionMode, SettingsData, SleepMode } from ".";
 
 export interface MotionPoint {
   path: string;
@@ -338,5 +338,39 @@ export class Backend {
   // can_switch_desktop_session
   public static async canSwitchDesktopSession(): Promise<boolean> {
     return (await call("can_switch_desktop_session")) as boolean;
+  }
+
+  // get_gpu_devices
+  public static async getGpuDevices(): Promise<GpuDevice[]> {
+    try {
+      const result = await call("get_gpu_devices") as any;
+      if (!result) {
+        return [];
+      }
+      return result as GpuDevice[];
+    } catch (e) {
+      console.error(`getGpuDevices error: ${e}`);
+      return [];
+    }
+  }
+
+  // set_vulkan_adapter
+  public static async setVulkanAdapter(deviceId: string): Promise<boolean> {
+    try {
+      return (await call("set_vulkan_adapter", deviceId)) as boolean;
+    } catch (e) {
+      console.error(`setVulkanAdapter error: ${e}`);
+      return false;
+    }
+  }
+
+  // get_current_vulkan_adapter
+  public static async getCurrentVulkanAdapter(): Promise<string> {
+    try {
+      return (await call("get_current_vulkan_adapter")) as string;
+    } catch (e) {
+      console.error(`getCurrentVulkanAdapter error: ${e}`);
+      return "";
+    }
   }
 }

@@ -83,6 +83,10 @@ export class Settings {
   public static sessionMode = "";
   public static canSwitchDesktopSession = false;
 
+  // GPU相关缓存
+  public static gpuDevices: any[] = [];
+  public static currentVulkanAdapter = "";
+
   // 私有构造函数，防止实例化
   private constructor() {}
 

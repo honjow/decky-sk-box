@@ -9,6 +9,7 @@ import { FC, useEffect, useState } from "react";
 import { Backend, Settings, SteamUtils } from "../backend";
 import { ActionButtonItem } from ".";
 import { useAdvance } from "../hooks";
+import { GpuSelector } from "./gpuSelector";
 
 
 export const AdvanceComponent: FC = () => {
@@ -21,6 +22,9 @@ export const AdvanceComponent: FC = () => {
     enableUSBWakeup,
     updateUSBWakeup,
     supportUmaf,
+    gpuDevices,
+    currentVulkanAdapter,
+    updateVulkanAdapter,
   } = useAdvance();
 
   useEffect(() => {
@@ -93,6 +97,11 @@ export const AdvanceComponent: FC = () => {
         </ButtonItem>
       </PanelSectionRow>
       {showAdvance && <>
+        <GpuSelector
+          gpuDevices={gpuDevices}
+          currentVulkanAdapter={currentVulkanAdapter}
+          onGpuChange={updateVulkanAdapter}
+        />
         <PanelSectionRow>
           <ActionButtonItem
             onClick={handBootBios}
@@ -154,6 +163,7 @@ export const AdvanceComponent: FC = () => {
             onChange={updateUSBWakeup}
           />
         </PanelSectionRow>
+
         <PanelSectionRow>
           <ActionButtonItem
             loading={swapfileMaking}

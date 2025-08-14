@@ -7,3 +7,10 @@ declare global {
     }
   }
 }
+
+export interface GpuDevice {
+  id: string;
+  name: string;
+  vendor: string;
+  vendorLabel: string;
+}
