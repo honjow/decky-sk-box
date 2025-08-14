@@ -27,7 +27,7 @@
   "homepage": "https://github.com/SteamDeckHomebrew/decky-plugin-template#readme",
   "devDependencies": {
     "@decky/rollup": "^1.0.1",
-    "@decky/ui": "^4.10.1",
+    "@decky/ui": "^4.10.4",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
