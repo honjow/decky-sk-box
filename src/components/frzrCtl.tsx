@@ -13,12 +13,17 @@ export const FrzrCtlComponent: FC = () => {
   }, [showFrzrCtl]);
 
   const renderConfigItem = (section: string, key: string, configValue: any) => {
-    const { value, type } = configValue;
+    const { value, type, label, description } = configValue;
+    
+    // 使用配置文件中的 label 和 description，如果没有则用 key 作为 fallback
+    const displayLabel = label || key;
+    const displayDescription = description || `${section}.${key} 配置项`;
     
     if (type === "boolean") {
       return (
         <ToggleField
-          label={key}
+          label={displayLabel}
+          description={displayDescription}
           checked={value}
           onChange={(newValue) => updateConfig(section, key, newValue.toString())}
         />
@@ -26,7 +31,8 @@ export const FrzrCtlComponent: FC = () => {
     } else {
       return (
         <TextField
-          label={key}
+          label={displayLabel}
+          description={displayDescription}
           value={value}
           onChange={(e) => updateConfig(section, key, e.target.value)}
         />

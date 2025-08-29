@@ -632,42 +632,124 @@ def get_vendor_name():
 
 
 def set_frzr_config(section: str, key: str, value: str):
-    """设置 /etc/frzr-sk.conf 配置文件"""
+    """设置 /etc/frzr-sk.conf 配置文件，保持注释"""
     config_file = "/etc/frzr-sk.conf"
     try:
-        update_ini_file(config_file, section, key, value)
-        logger.info(f"Updated frzr config: {section}.{key} = {value}")
-        return True
+        # 用 configparser 读取，确保 section 和 key 存在
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        
+        if not config.has_section(section):
+            logger.error(f"Section {section} not found")
+            return False
+            
+        if not config.has_option(section, key):
+            logger.error(f"Key {key} not found in section {section}")
+            return False
+        
+        # 验证通过后，用简单的文件操作更新
+        with open(config_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        current_section = None
+        for i, line in enumerate(lines):
+            line_stripped = line.strip()
+            
+            # 跟踪当前 section
+            if line_stripped.startswith('[') and line_stripped.endswith(']'):
+                current_section = line_stripped[1:-1]
+                logger.debug(f"Found section: {current_section}")
+                continue
+            
+            # 只在目标 section 中查找
+            if current_section == section and '=' in line_stripped and not line_stripped.startswith('#'):
+                # 分割 key 和 value
+                parts = line_stripped.split('=', 1)
+                if len(parts) == 2:
+                    config_key = parts[0].strip()
+                    logger.debug(f"Checking key: '{config_key}' against '{key}' in section '{current_section}'")
+                    
+                    if config_key == key:
+                        indent = len(line) - len(line.lstrip())
+                        lines[i] = " " * indent + f"{key} = {value}\n"
+                        
+                        with open(config_file, 'w', encoding='utf-8') as f:
+                            f.writelines(lines)
+                        logger.info(f"Updated frzr config: {section}.{key} = {value}")
+                        return True
+        
+        logger.error(f"Config key {key} not found in section {section}")
+        return False
+            
     except Exception as e:
         logger.error(f"Error updating frzr config: {e}")
         return False
 
 
 def get_frzr_config_structure():
-    """读取 /etc/frzr-sk.conf 的完整结构"""
+    """读取 /etc/frzr-sk.conf 的完整结构，包括元数据"""
     config_file = "/etc/frzr-sk.conf"
     config_structure = {}
     
     try:
         if os.path.exists(config_file):
-            config = configparser.ConfigParser()
-            config.read(config_file)
+            with open(config_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
             
-            for section in config.sections():
-                config_structure[section] = {}
-                for key, value in config.items(section):
+            current_section = None
+            current_key = None
+            pending_metadata = {}  # 存储待关联的元数据
+            
+            for line in lines:
+                line = line.strip()
+                
+                # 解析 section
+                if line.startswith('[') and line.endswith(']'):
+                    current_section = line[1:-1]
+                    config_structure[current_section] = {}
+                    current_key = None
+                    pending_metadata = {}
+                    continue
+                
+                # 解析注释中的元数据
+                if line.startswith('# @'):
+                    if current_section:
+                        parts = line[3:].split(':', 1)
+                        if len(parts) == 2:
+                            meta_key = parts[0].strip()
+                            meta_value = parts[1].strip()
+                            
+                            if meta_key == 'label':
+                                pending_metadata['label'] = meta_value
+                            elif meta_key == 'description':
+                                pending_metadata['description'] = meta_value
+                    continue
+                
+                # 解析配置项
+                if '=' in line and current_section:
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+                    current_key = key
+                    
                     # 尝试转换为布尔值
                     try:
                         bool_value = value.lower() == "true"
-                        config_structure[section][key] = {
+                        config_structure[current_section][key] = {
                             "value": bool_value,
                             "type": "boolean"
                         }
                     except:
-                        config_structure[section][key] = {
+                        config_structure[current_section][key] = {
                             "value": value,
                             "type": "string"
                         }
+                    
+                    # 关联待处理的元数据
+                    if pending_metadata:
+                        config_structure[current_section][key].update(pending_metadata)
+                        pending_metadata = {}  # 清空待处理的元数据
+                        
     except Exception as e:
         logger.error(f"Error reading frzr config structure: {e}")
     

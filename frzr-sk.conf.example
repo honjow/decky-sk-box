@@ -1,0 +1,20 @@
+[Download]
+# @label: 备用下载地址
+# @description: 启用备用下载地址，适合国内网络环境，当备用下载地址不可用时自动切换到 Github 源
+fallback_url = true
+
+# @label: Gitee API
+# @description: 使用 Gitee API 作为备选源，适合国内网络环境。关闭则会通过 Github API 地址获取 Release 信息
+gitee_api = true
+
+# @label: Gitee 校验
+# @description: 使用 Gitee 进行文件完整性校验，确保下载文件正确。关闭则会通过 Github 校验
+gitee_checksum = true
+
+# @label: Release CDN
+# @description: 使用 CDN 加速 Github Release 下载，提高下载速度。默认关闭，如果CND列表更新不及时，可能会导致功能异常。可自行编辑 /etc/github_cdn.conf 文件维护 CDN 列表
+release_cdn = false
+
+# @label: API CDN  
+# @description: 同 Release CDN，默认关闭
+api_cdn = false

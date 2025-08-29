@@ -18,6 +18,8 @@ export interface GpuDevice {
 export interface FrzrConfigValue {
   value: boolean | string;
   type: "boolean" | "string";
+  label?: string;        // 新增：显示标签
+  description?: string;  // 新增：描述信息
 }
 
 export interface FrzrConfigStructure {
