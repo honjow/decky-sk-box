@@ -6,7 +6,7 @@ import { useFrzrCtl } from "../hooks/useFrzrCtl";
 
 export const FrzrCtlComponent: FC = () => {
   const [showFrzrCtl, setShowFrzrCtl] = useState<boolean>(Settings.showFrzrCtl);
-  const { configStructure, loading, updateConfig } = useFrzrCtl();
+  const { configStructure, updateConfig } = useFrzrCtl();
 
   useEffect(() => {
     Settings.showFrzrCtl = showFrzrCtl;
@@ -21,7 +21,6 @@ export const FrzrCtlComponent: FC = () => {
           label={key}
           checked={value}
           onChange={(newValue) => updateConfig(section, key, newValue.toString())}
-          disabled={loading}
         />
       );
     } else {
@@ -30,7 +29,6 @@ export const FrzrCtlComponent: FC = () => {
           label={key}
           value={value}
           onChange={(e) => updateConfig(section, key, e.target.value)}
-          disabled={loading}
         />
       );
     }
@@ -57,7 +55,8 @@ export const FrzrCtlComponent: FC = () => {
         <>
           {Object.entries(configStructure).map(([section, sectionConfig]) =>
             Object.entries(sectionConfig).map(([key, configValue]) => (
-              <PanelSectionRow>
+              // @ts-ignore
+              <PanelSectionRow key={`${section}.${key}`}>
                 {renderConfigItem(section, key, configValue)}
               </PanelSectionRow>
             ))
