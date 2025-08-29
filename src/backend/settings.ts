@@ -19,28 +19,33 @@ export class SettingsData {
   public showSwitch: boolean;
   public showAdvance: boolean;
   public showAutoUpdate: boolean;
+  public showFrzrCtl: boolean;
 
   public constructor() {
     this.showSwitch = false;
     this.showAdvance = false;
     this.showAutoUpdate = false;
+    this.showFrzrCtl = false;
   }
 
   public deepCopy(settingsData: SettingsData): SettingsData {
     this.showSwitch = settingsData.showSwitch;
     this.showAdvance = settingsData.showAdvance;
     this.showAutoUpdate = settingsData.showAutoUpdate;
+    this.showFrzrCtl = settingsData.showFrzrCtl;
     return this;
   }
 
   public copyWith(
     showSwitch?: boolean,
     showAdvance?: boolean,
-    showAutoUpdate?: boolean
+    showAutoUpdate?: boolean,
+    showFrzrCtl?: boolean
   ): SettingsData {
     if (showSwitch !== undefined) this.showSwitch = showSwitch;
     if (showAdvance !== undefined) this.showAdvance = showAdvance;
     if (showAutoUpdate !== undefined) this.showAutoUpdate = showAutoUpdate;
+    if (showFrzrCtl !== undefined) this.showFrzrCtl = showFrzrCtl;
     return this;
   }
 }
@@ -122,6 +127,15 @@ export class Settings {
     this.saveSettingsData();
   }
 
+  static get showFrzrCtl(): boolean {
+    return this.settingsData.showFrzrCtl;
+  }
+
+  static set showFrzrCtl(value: boolean) {
+    this.settingsData.showFrzrCtl = value;
+    this.saveSettingsData();
+  }
+
   // Methods
   public static async loadSettingsData() {
     const settingsData = await Backend.getSettings();
@@ -157,7 +171,7 @@ export class Settings {
       sleepMode,
       sessionMode,
       hibernateDelay,
-      canSwitchDesktopSession
+      canSwitchDesktopSession,
     ] = await Promise.all([
       Backend.getVersion(),
       Backend.getLatestVersion(),

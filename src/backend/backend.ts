@@ -1,5 +1,11 @@
 import { call } from "@decky/api";
-import { GpuDevice, SessionMode, SettingsData, SleepMode } from ".";
+import {
+  FrzrConfigStructure,
+  GpuDevice,
+  SessionMode,
+  SettingsData,
+  SleepMode,
+} from ".";
 
 export interface MotionPoint {
   path: string;
@@ -10,8 +16,7 @@ export interface MotionPoint {
 }
 
 export class Backend {
-  public static async init() {
-  }
+  public static async init() {}
 
   public static async updateLatest() {
     return call("update_latest");
@@ -72,7 +77,6 @@ export class Backend {
 
   // get_hhd_enabled
   public static async getHHDEnabled(): Promise<boolean> {
-
     try {
       return (await call("get_hhd_enabled")) as boolean;
     } catch (e) {
@@ -148,7 +152,7 @@ export class Backend {
 
   // get_skt_update_enabled
   public static async getSktUpdateEnabled(): Promise<boolean> {
-    return (await call("get_skt_update_enabled")) as boolean || false;
+    return ((await call("get_skt_update_enabled")) as boolean) || false;
   }
 
   // set_skt_update_enabled
@@ -158,7 +162,7 @@ export class Backend {
 
   // get_handy_update_enabled
   public static async getHandyUpdateEnabled(): Promise<boolean> {
-    return (await call("get_handy_update_enabled")) as boolean || false;
+    return ((await call("get_handy_update_enabled")) as boolean) || false;
   }
 
   // set_handy_update_enabled
@@ -168,12 +172,36 @@ export class Backend {
 
   // get_hhd_update_enabled
   public static async getHHDUpdateEnabled(): Promise<boolean> {
-    return (await call("get_hhd_update_enabled")) as boolean || false;
+    return ((await call("get_hhd_update_enabled")) as boolean) || false;
   }
 
   // set_hhd_update_enabled
   public static async setHhdUpdateEnabled(value: boolean) {
     return await call("set_hhd_update_enabled", value);
+  }
+
+  // get_frzr_config_structure
+  public static async getFrzrConfigStructure(): Promise<FrzrConfigStructure> {
+    try {
+      return (await call("get_frzr_config_structure")) as FrzrConfigStructure;
+    } catch (e) {
+      console.error(`getFrzrConfigStructure error: ${e}`);
+      return {};
+    }
+  }
+
+  // set_frzr_config
+  public static async setFrzrConfig(
+    section: string,
+    key: string,
+    value: string
+  ): Promise<boolean> {
+    try {
+      return (await call("set_frzr_config", section, key, value)) as boolean;
+    } catch (e) {
+      console.error(`setFrzrConfig error: ${e}`);
+      return false;
+    }
   }
 
   // boot_repair
@@ -208,7 +236,7 @@ export class Backend {
 
   // get_settings
   public static async getSettings(): Promise<SettingsData> {
-    const res = await call("get_settings") as any;
+    const res = (await call("get_settings")) as any;
     if (!res) {
       return new SettingsData();
     }
@@ -237,7 +265,7 @@ export class Backend {
 
   // get_mountpoint
   public static async getMountpoint(): Promise<MotionPoint[]> {
-    const result = await call("get_mountpoint") as any;
+    const result = (await call("get_mountpoint")) as any;
     if (!result) {
       return [];
     }
@@ -256,7 +284,7 @@ export class Backend {
 
   // add_library_folder
   public static async addLibraryFolder(mountpoint: string): Promise<boolean> {
-    const result = await call("add_library_folder", mountpoint) as any;
+    const result = (await call("add_library_folder", mountpoint)) as any;
     if (!result) {
       return false;
     }
@@ -280,7 +308,7 @@ export class Backend {
 
   // get_sleep_mode
   public static async getSleepMode(): Promise<SleepMode> {
-    return (await call("get_sleep_mode")) as SleepMode || SleepMode.SUSPEND;
+    return ((await call("get_sleep_mode")) as SleepMode) || SleepMode.SUSPEND;
   }
 
   // set_sleep_mode
@@ -295,7 +323,7 @@ export class Backend {
 
   // get_hibernate_delay
   public static async getHibernateDelay(): Promise<string> {
-    return (await call("get_hibernate_delay")) as string || "";
+    return ((await call("get_hibernate_delay")) as string) || "";
   }
 
   // support_umaf
@@ -315,17 +343,17 @@ export class Backend {
 
   // get_product_name
   public static async getProductName(): Promise<string> {
-    return (await call("get_product_name")) as string || "";
+    return ((await call("get_product_name")) as string) || "";
   }
 
   // get_vendor_name
   public static async getVendorName(): Promise<string> {
-    return (await call("get_vendor_name")) as string || "";
+    return ((await call("get_vendor_name")) as string) || "";
   }
 
   // get_desktop_session
   public static async getDesktopSession(): Promise<SessionMode> {
-    const result = await call("get_desktop_session") as SessionMode;
+    const result = (await call("get_desktop_session")) as SessionMode;
     console.log(`get_desktop_session: ${result}`);
     return result || SessionMode.XORG;
   }
@@ -343,7 +371,7 @@ export class Backend {
   // get_gpu_devices
   public static async getGpuDevices(): Promise<GpuDevice[]> {
     try {
-      const result = await call("get_gpu_devices") as any;
+      const result = (await call("get_gpu_devices")) as any;
       if (!result) {
         return [];
       }

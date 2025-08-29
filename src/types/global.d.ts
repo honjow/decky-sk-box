@@ -14,3 +14,14 @@ export interface GpuDevice {
   vendor: string;
   vendorLabel: string;
 }
+
+export interface FrzrConfigValue {
+  value: boolean | string;
+  type: "boolean" | "string";
+}
+
+export interface FrzrConfigStructure {
+  [section: string]: {
+    [key: string]: FrzrConfigValue;
+  };
+}

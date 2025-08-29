@@ -629,3 +629,46 @@ def get_vendor_name():
             return f.read().strip()
     except FileNotFoundError:
         return ""
+
+
+def set_frzr_config(section: str, key: str, value: str):
+    """设置 /etc/frzr-sk.conf 配置文件"""
+    config_file = "/etc/frzr-sk.conf"
+    try:
+        update_ini_file(config_file, section, key, value)
+        logger.info(f"Updated frzr config: {section}.{key} = {value}")
+        return True
+    except Exception as e:
+        logger.error(f"Error updating frzr config: {e}")
+        return False
+
+
+def get_frzr_config_structure():
+    """读取 /etc/frzr-sk.conf 的完整结构"""
+    config_file = "/etc/frzr-sk.conf"
+    config_structure = {}
+    
+    try:
+        if os.path.exists(config_file):
+            config = configparser.ConfigParser()
+            config.read(config_file)
+            
+            for section in config.sections():
+                config_structure[section] = {}
+                for key, value in config.items(section):
+                    # 尝试转换为布尔值
+                    try:
+                        bool_value = value.lower() == "true"
+                        config_structure[section][key] = {
+                            "value": bool_value,
+                            "type": "boolean"
+                        }
+                    except:
+                        config_structure[section][key] = {
+                            "value": value,
+                            "type": "string"
+                        }
+    except Exception as e:
+        logger.error(f"Error reading frzr config structure: {e}")
+    
+    return config_structure

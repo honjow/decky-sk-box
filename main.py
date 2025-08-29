@@ -206,6 +206,22 @@ class Plugin:
             logging.error(f"Error setting HHD Update enabled: {e}")
             return False
 
+    async def get_frzr_config_structure(self):
+        """获取 frzr-sk.conf 配置结构"""
+        try:
+            return utils.get_frzr_config_structure()
+        except Exception as e:
+            logging.error(f"Error getting frzr config structure: {e}")
+            return {}
+
+    async def set_frzr_config(self, section: str, key: str, value: str):
+        """设置 frzr-sk.conf 配置"""
+        try:
+            return utils.set_frzr_config(section, key, value)
+        except Exception as e:
+            logging.error(f"Error setting frzr config: {e}")
+            return False
+
     async def boot_repair(self):
         try:
             utils.boot_repair()

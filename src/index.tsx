@@ -7,6 +7,7 @@ import { FaDemocrat } from "react-icons/fa";
 import {
   AdvanceComponent,
   AutoUpdateComponent,
+  FrzrCtlComponent,
   MoreComponent,
   GeneralComponent,
   ToolComponent,
@@ -20,6 +21,7 @@ const Content: FC<{}> = () => {
       <ToolComponent />
       <GeneralComponent />
       <AdvanceComponent />
+      <FrzrCtlComponent />
       <AutoUpdateComponent />
       <MoreComponent />
     </>
