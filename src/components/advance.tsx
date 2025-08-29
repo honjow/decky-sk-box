@@ -80,7 +80,7 @@ export const AdvanceComponent: FC = () => {
   }
 
   return (
-    <PanelSection title={"高级"}>
+    <PanelSection title={"高级设置"}>
       <PanelSectionRow>
         <ButtonItem
           layout="below"

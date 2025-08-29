@@ -41,7 +41,7 @@ export const FrzrCtlComponent: FC = () => {
   };
 
   return (
-    <PanelSection title={"更新控制"}>
+    <PanelSection title={"系统更新"}>
       <PanelSectionRow>
         <ButtonItem
           layout="below"

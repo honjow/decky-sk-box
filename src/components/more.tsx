@@ -15,7 +15,7 @@ export const MoreComponent: FC = () => {
 
     return (
         <>
-            <PanelSection title="更多">
+            <PanelSection title="更多信息">
                 <PanelSectionRow>
                     <ActionButtonItem
                         layout="below"

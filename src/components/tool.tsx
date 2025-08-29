@@ -30,7 +30,7 @@ export const ToolComponent: FC = () => {
   };
 
   return (
-    <PanelSection title={"工具"}>
+    <PanelSection title={"系统工具"}>
       {showBootToWindows && (
         <PanelSectionRow>
           <ActionButtonItem onClick={bootToWindows} debugLabel="bootToWindows">

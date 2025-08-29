@@ -109,7 +109,7 @@ export const GeneralComponent: FC = () => {
   };
 
   return (
-    <PanelSection title={"常规"}>
+    <PanelSection title={"常规设置"}>
       <PanelSectionRow>
         <ButtonItem
           layout="below"

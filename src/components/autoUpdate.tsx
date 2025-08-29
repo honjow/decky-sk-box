@@ -29,7 +29,7 @@ export const AutoUpdateComponent: FC = () => {
   }, [showAutoUpdate]);
 
   return (
-    <PanelSection title={"更新"}>
+    <PanelSection title={"组件更新"}>
       <PanelSectionRow>
         <ButtonItem
           layout="below"
@@ -71,7 +71,7 @@ export const AutoUpdateComponent: FC = () => {
           </PanelSectionRow> */}
           <PanelSectionRow>
             <ToggleField
-              label={"自动更新 Sk-ChimeraOS 工具"}
+              label={"自动更新 SkorionOS 工具"}
               checked={enableAutoUpdateSkChosTool}
               onChange={updateAutoUpdateSkChosTool}
             />
