@@ -5,4 +5,9 @@ export * from "./steamUtils";
 export * from "./enum";
 
 // Export types
-export type { GpuDevice, FrzrConfigValue, FrzrConfigStructure } from "../types/global";
+export type {
+  GpuDevice,
+  FrzrConfigValue,
+  FrzrConfigStructure,
+  FrzrMetadata,
+} from "../types/global";

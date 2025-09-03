@@ -3,6 +3,7 @@
 
 import configparser
 import glob
+import json
 import os
 import pwd
 import queue
@@ -686,6 +687,17 @@ def set_frzr_config(section: str, key: str, value: str):
         return False
 
 
+def load_frzr_metadata():
+    """加载 frzr 元数据文件（只读）"""
+    metadata_file = "/etc/frzr-sk.meta.json"
+    try:
+        if os.path.exists(metadata_file):
+            with open(metadata_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading frzr metadata: {e}")
+    return {}
+
 def get_frzr_config_structure():
     """读取 /etc/frzr-sk.conf 的完整结构，包括元数据"""
     config_file = "/etc/frzr-sk.conf"
@@ -693,64 +705,87 @@ def get_frzr_config_structure():
     
     try:
         if os.path.exists(config_file):
-            with open(config_file, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
+            # 1. 解析主配置文件
+            config_structure = parse_config_file_with_comments(config_file)
             
-            current_section = None
-            current_key = None
-            pending_metadata = {}  # 存储待关联的元数据
+            # 2. 加载元数据文件（只读）
+            metadata = load_frzr_metadata()
             
-            for line in lines:
-                line = line.strip()
-                
-                # 解析 section
-                if line.startswith('[') and line.endswith(']'):
-                    current_section = line[1:-1]
-                    config_structure[current_section] = {}
-                    current_key = None
-                    pending_metadata = {}
-                    continue
-                
-                # 解析注释中的元数据
-                if line.startswith('# @'):
-                    if current_section:
-                        parts = line[3:].split(':', 1)
-                        if len(parts) == 2:
-                            meta_key = parts[0].strip()
-                            meta_value = parts[1].strip()
+            # 3. 合并元数据（优先级：元数据文件 > 注释 > 默认值）
+            for section, section_config in config_structure.items():
+                for key, config_value in section_config.items():
+                    # 检查元数据文件
+                    if section in metadata and key in metadata[section]:
+                        meta = metadata[section][key]
+                        if 'label' in meta:
+                            config_value['label'] = meta['label']
+                        if 'description' in meta:
+                            config_value['description'] = meta['description']
                             
-                            if meta_key == 'label':
-                                pending_metadata['label'] = meta_value
-                            elif meta_key == 'description':
-                                pending_metadata['description'] = meta_value
-                    continue
-                
-                # 解析配置项
-                if '=' in line and current_section:
-                    key, value = line.split('=', 1)
-                    key = key.strip()
-                    value = value.strip()
-                    current_key = key
-                    
-                    # 尝试转换为布尔值
-                    try:
-                        bool_value = value.lower() == "true"
-                        config_structure[current_section][key] = {
-                            "value": bool_value,
-                            "type": "boolean"
-                        }
-                    except:
-                        config_structure[current_section][key] = {
-                            "value": value,
-                            "type": "string"
-                        }
-                    
-                    # 关联待处理的元数据
-                    if pending_metadata:
-                        config_structure[current_section][key].update(pending_metadata)
-                        pending_metadata = {}  # 清空待处理的元数据
-                        
     except Exception as e:
         logger.error(f"Error reading frzr config structure: {e}")
+    
+    return config_structure
+
+def parse_config_file_with_comments(config_file):
+    """解析配置文件，包括注释中的元数据"""
+    config_structure = {}
+    
+    with open(config_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    
+    current_section = None
+    current_key = None
+    pending_metadata = {}
+    
+    for line in lines:
+        line = line.strip()
+        
+        # 解析 section
+        if line.startswith('[') and line.endswith(']'):
+            current_section = line[1:-1]
+            config_structure[current_section] = {}
+            current_key = None
+            pending_metadata = {}
+            continue
+        
+        # 解析注释中的元数据
+        if line.startswith('# @'):
+            if current_section:
+                parts = line[3:].split(':', 1)
+                if len(parts) == 2:
+                    meta_key = parts[0].strip()
+                    meta_value = parts[1].strip()
+                    
+                    if meta_key == 'label':
+                        pending_metadata['label'] = meta_value
+                    elif meta_key == 'description':
+                        pending_metadata['description'] = meta_value
+            continue
+        
+        # 解析配置项
+        if '=' in line and current_section:
+            key, value = line.split('=', 1)
+            key = key.strip()
+            value = value.strip()
+            current_key = key
+            
+            # 尝试转换为布尔值
+            try:
+                bool_value = value.lower() == "true"
+                config_structure[current_section][key] = {
+                    "value": bool_value,
+                    "type": "boolean"
+                }
+            except:
+                config_structure[current_section][key] = {
+                    "value": value,
+                    "type": "string"
+                }
+            
+            # 关联待处理的元数据
+            if pending_metadata:
+                config_structure[current_section][key].update(pending_metadata)
+                pending_metadata = {}
     
     return config_structure

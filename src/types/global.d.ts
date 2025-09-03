@@ -27,3 +27,12 @@ export interface FrzrConfigStructure {
     [key: string]: FrzrConfigValue;
   };
 }
+
+export interface FrzrMetadata {
+  [section: string]: {
+    [key: string]: {
+      label?: string;
+      description?: string;
+    };
+  };
+}

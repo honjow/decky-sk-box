@@ -222,6 +222,14 @@ class Plugin:
             logging.error(f"Error setting frzr config: {e}")
             return False
 
+    async def get_frzr_metadata(self):
+        """获取 frzr 元数据（只读）"""
+        try:
+            return utils.load_frzr_metadata()
+        except Exception as e:
+            logging.error(f"Error getting frzr metadata: {e}")
+            return {}
+
     async def boot_repair(self):
         try:
             utils.boot_repair()

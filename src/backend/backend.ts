@@ -1,6 +1,7 @@
 import { call } from "@decky/api";
 import {
   FrzrConfigStructure,
+  FrzrMetadata,
   GpuDevice,
   SessionMode,
   SettingsData,
@@ -201,6 +202,16 @@ export class Backend {
     } catch (e) {
       console.error(`setFrzrConfig error: ${e}`);
       return false;
+    }
+  }
+
+  // get_frzr_metadata
+  public static async getFrzrMetadata(): Promise<FrzrMetadata> {
+    try {
+      return (await call("get_frzr_metadata")) as FrzrMetadata;
+    } catch (e) {
+      console.error(`getFrzrMetadata error: ${e}`);
+      return {};
     }
   }
 

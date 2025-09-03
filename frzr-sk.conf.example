@@ -4,11 +4,11 @@
 fallback_url = true
 
 # @label: Gitee API
-# @description: 使用 Gitee API 作为备选源，适合国内网络环境。关闭则会通过 Github API 地址获取 Release 信息
+# @description: 使用 Gitee/Gitcode API 作为备选源，适合国内网络环境。关闭则会通过 Github API 地址获取 Release 信息
 gitee_api = true
 
 # @label: Gitee 校验
-# @description: 使用 Gitee 进行文件完整性校验，确保下载文件正确。关闭则会通过 Github 校验
+# @description: 使用 Gitee/Gitcode 进行文件完整性校验，确保下载文件正确。关闭则会通过 Github 校验
 gitee_checksum = true
 
 # @label: Release CDN
