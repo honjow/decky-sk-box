@@ -1,13 +1,37 @@
 import os
 import subprocess
 import urllib.parse
-
+import re
+import codecs
+import decky
 from config import logger
 from utils import get_env
 
 
 def urlencode(arg):
     return urllib.parse.quote(arg, safe="")
+
+
+def decode_lsblk_escape(text: str) -> str:
+    """Decode escape sequences from lsblk -r output
+    
+    lsblk -r escapes special characters (including spaces and non-ASCII chars) as \\xXX
+    This function decodes them back to the original string.
+    
+    Args:
+        text: String with escape sequences like \\xe6\\xb8\\xb8
+        
+    Returns:
+        Decoded string with proper UTF-8 characters
+    """
+    try:
+        # First decode the escape sequences as unicode_escape
+        decoded = codecs.decode(text, 'unicode_escape')
+        # The result is in latin-1, re-encode and decode as UTF-8
+        return decoded.encode('latin-1').decode('utf-8')
+    except (UnicodeDecodeError, UnicodeEncodeError) as e:
+        logger.warning(f"Failed to decode escape sequences in '{text}': {e}")
+        return text  # Return original if decoding fails
 
 
 def send_to_steamcmd(steam_command: str, arg: str):
@@ -55,6 +79,54 @@ def send_to_steamcmd(steam_command: str, arg: str):
         return False
 
 
+def get_steam_library_folders():
+    """Get all Steam library folders from libraryfolders.vdf"""
+    library_paths = []
+    
+    # Possible locations for libraryfolders.vdf
+    possible_paths = [
+        os.path.expanduser("~/.steam/steam/steamapps/libraryfolders.vdf"),
+        os.path.expanduser("~/.local/share/Steam/steamapps/libraryfolders.vdf"),
+        f"/home/{decky.DECKY_USER}/.steam/steam/steamapps/libraryfolders.vdf",
+        f"/home/{decky.DECKY_USER}/.local/share/Steam/steamapps/libraryfolders.vdf",
+    ]
+    
+    vdf_path = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            vdf_path = path
+            break
+    
+    if not vdf_path:
+        logger.warning("libraryfolders.vdf not found")
+        return library_paths
+    
+    try:
+        with open(vdf_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            # Extract all "path" values from VDF file
+            # Pattern matches: "path"		"/some/path"
+            path_pattern = r'"path"\s+"([^"]+)"'
+            matches = re.findall(path_pattern, content)
+            library_paths = matches
+            logger.info(f"Found Steam library folders: {library_paths}")
+    except Exception as e:
+        logger.error(f"Error reading libraryfolders.vdf: {e}")
+    
+    return library_paths
+
+
+def is_library_folder_exists(folder_path: str):
+    """Check if a folder path is already added as a Steam library"""
+    library_folders = get_steam_library_folders()
+    # Normalize paths for comparison
+    normalized_target = os.path.normpath(folder_path)
+    for lib_path in library_folders:
+        if os.path.normpath(lib_path) == normalized_target:
+            return True
+    return False
+
+
 def get_mountpoint():
     mountpoint_list = []
     command = """
@@ -93,12 +165,19 @@ done
         for line in lines:
             path, mountpoint, fstype, fssize, fsvail, parttype_name = line.split(" ")
             if path and mountpoint and fstype and fssize and fsvail and parttype_name:
-                parttype_name = bytes(parttype_name, "utf-8").decode("unicode_escape")
+                # Decode escaped characters in user-controlled fields
+                mountpoint = decode_lsblk_escape(mountpoint)
+                parttype_name = decode_lsblk_escape(parttype_name)
                 logger.info(
                     f"get_mountpoint: {path}, {mountpoint}, {fstype}, {fssize}, {fsvail}, {parttype_name}"
                 )
                 if fstype == "ntfs" and parttype_name == "Windows recovery environment":
                     continue
+                
+                # Check if this mountpoint's SteamLibrary is already added
+                libraryfolder = os.path.join(mountpoint, "SteamLibrary")
+                is_added = is_library_folder_exists(libraryfolder)
+                
                 # dict
                 mountpoint_list.append(
                     {
@@ -107,6 +186,7 @@ done
                         "fstype": fstype,
                         "fssize": fssize,
                         "fsvail": fsvail,
+                        "is_added": is_added,
                     }
                 )
         logger.info(f"get_mountpoint: {mountpoint_list}")

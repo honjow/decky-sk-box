@@ -42,7 +42,7 @@ export const ToolComponent: FC = () => {
         <ActionButtonItem
           onClick={addSteamLibrary}
           debugLabel="addSteamLibrary"
-          description="可以直接添加 Steam 游戏库, 省去切换桌面模式的步骤, 但是不能自动排除已经添加为库的路径。主要用于添加新的空库, 现有游戏库默认情况已经会自动添加"
+          description="可以直接添加 Steam 游戏库, 省去切换桌面模式的步骤。主要用于添加新的空库, 现有游戏库默认情况已经会自动添加。如果发现现有库未添加, 请检查磁盘挂载以及权限是否正确"
         >
           添加 Steam 游戏库
         </ActionButtonItem>
@@ -113,11 +113,17 @@ export const AddSteamLibraryModal: FC<AddSteamLibraryModalProps> = ({
                 <PanelSectionRow>
                   <ButtonItem
                     label={point.mountpoint}
+                    description={
+                      point.is_added
+                        ? "此路径的 SteamLibrary 已添加"
+                        : undefined
+                    }
+                    // disabled={point.is_added}
                     onClick={() => {
                       showModal(<MountpointInfiModel mountpoint={point} />);
                     }}
                   >
-                    添加
+                    {point.is_added ? "重新添加" : "添加"}
                   </ButtonItem>
                 </PanelSectionRow>
               </div>

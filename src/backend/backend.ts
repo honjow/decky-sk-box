@@ -14,6 +14,7 @@ export interface MotionPoint {
   fstype: string;
   fssize: string;
   fsvail: string;
+  is_added: boolean;
 }
 
 export class Backend {
@@ -289,6 +290,7 @@ export class Backend {
         fstype: item["fstype"],
         fssize: item["fssize"],
         fsvail: item["fsvail"],
+        is_added: item["is_added"] || false,
       } as MotionPoint;
     });
   }
