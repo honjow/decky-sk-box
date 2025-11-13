@@ -1,6 +1,6 @@
 {
   "name": "decky-sk-box",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Decky plugins for Sk-ChimeraOS",
   "type": "module",
   "scripts": {
