@@ -16,11 +16,11 @@ export const AutoUpdateComponent: FC = () => {
   const {
     enableAutoUpdate,
     // enableAutoUpdateHandyGCCS,
-    enableAutoUpdateHHD,
+    // enableAutoUpdateHHD,
     enableAutoUpdateSkChosTool,
     updateAutoUpdate,
     // updateAutoUpdateHandyGCCS,
-    updateAutoUpdateHHD,
+    // updateAutoUpdateHHD,
     updateAutoUpdateSkChosTool,
   } = useAutoUpdate();
 
@@ -55,13 +55,13 @@ export const AutoUpdateComponent: FC = () => {
           />
         </PanelSectionRow>
         {enableAutoUpdate && <>
-          <PanelSectionRow>
+          {/* <PanelSectionRow>
             <ToggleField
               label={"自动更新 HHD"}
               checked={enableAutoUpdateHHD}
               onChange={updateAutoUpdateHHD}
             />
-          </PanelSectionRow>
+          </PanelSectionRow> */}
           {/* <PanelSectionRow>
             <ToggleField
               label={"自动更新 HandyGCCS"}
