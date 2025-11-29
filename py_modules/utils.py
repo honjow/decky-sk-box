@@ -364,6 +364,35 @@ def make_swapfile():
     return success, ret_msg
 
 
+def make_swapfile_with_size(size_gb: int):
+    """
+    Create swapfile with specified size
+    
+    Args:
+        size_gb: Size in GB
+    
+    Returns:
+        tuple: (success, message)
+    """
+    logger.info(f"Creating swapfile with size: {size_gb}GB")
+    try:
+        # Call sk-mkswapfile directly with size parameter, then setup kernel options
+        commands = [
+            f"sudo swapoff /frzr_root/swap/swapfile 2>/dev/null || true",
+            f"sudo /usr/bin/sk-mkswapfile {size_gb}",
+            f"sudo swapon /frzr_root/swap/swapfile || true",
+            f"sudo /usr/bin/sk-setup-kernel-options",
+        ]
+        command = " && ".join(commands)
+        success, ret_msg = run_command(command, f"创建 {size_gb}GB swapfile")
+        if success:
+            ret_msg = f"创建 {size_gb}GB swapfile 完成, 重启生效"
+        return success, ret_msg
+    except Exception as e:
+        logger.error(f"Error making swapfile with size {size_gb}GB: {e}")
+        return False, str(e)
+
+
 def etc_repair_full():
     command = f"sudo {SK_TOOL_SCRIPTS_PATH}/etc_repair.sh full && sk-first-run"
     success, ret_msg = run_command(command, "修复 /etc (完全)")
@@ -899,7 +928,8 @@ def get_hibernate_readiness():
         )
         if not result['checks']['swap_size_ok']:
             result['reason'] = f"Swap 不足 ({result['info']['swap_total_gb']}GB < {result['info']['mem_total_gb']}GB)"
-            result['suggestions'].append("请在高级设置中重建 swapfile，系统会自动创建足够大小的 swap")
+            result['suggestions'].append("请在高级设置中使用'自定义 Swap 大小'创建足够大的 swap")
+            result['suggestions'].append("或直接点击'立即休眠'按钮，系统会自动引导创建")
             return result
         
         # 4. Check kernel cmdline for resume configuration

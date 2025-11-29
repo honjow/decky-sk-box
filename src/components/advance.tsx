@@ -1,7 +1,10 @@
 import {
   ButtonItem,
+  ConfirmModal,
+  DropdownItem,
   PanelSection,
   PanelSectionRow,
+  showModal,
   ToggleField,
 } from "@decky/ui";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
@@ -77,6 +80,10 @@ export const AdvanceComponent: FC = () => {
 
   const handBootUmaf = async () => {
     await Backend.bootUmaf();
+  }
+
+  const handCustomSwapSize = () => {
+    showModal(<CustomSwapModal />);
   }
 
   return (
@@ -174,6 +181,15 @@ export const AdvanceComponent: FC = () => {
         </PanelSectionRow>
         <PanelSectionRow>
           <ActionButtonItem
+            onClick={handCustomSwapSize}
+            debugLabel="customSwapSize"
+            description="手动指定 swapfile 大小创建，适合需要特定大小或用于休眠的场景"
+          >
+            自定义 Swap 大小
+          </ActionButtonItem>
+        </PanelSectionRow>
+        <PanelSectionRow>
+          <ActionButtonItem
             description={"初始化 Gnome 桌面配置到默认状态"}
             onClick={handResetGnome}
             debugLabel="resetGnome"
@@ -186,3 +202,88 @@ export const AdvanceComponent: FC = () => {
     </PanelSection>
   )
 }
+
+interface CustomSwapModalProps {
+  closeModal?: () => void;
+}
+
+const CustomSwapModal: FC<CustomSwapModalProps> = ({ closeModal }) => {
+  const [swapSize, setSwapSize] = useState<number>(32);
+  const [memorySize, setMemorySize] = useState<number>(32);
+  const [creating, setCreating] = useState<boolean>(false);
+  
+  useEffect(() => {
+    const getMemory = async () => {
+      try {
+        const info = await Backend.getHibernateReadiness();
+        if (info.info.mem_total_gb > 0) {
+          const size = Math.ceil(info.info.mem_total_gb);
+          setMemorySize(size);
+          setSwapSize(size);
+        }
+      } catch (e) {
+        console.error(`Failed to get memory size: ${e}`);
+      }
+    };
+    getMemory();
+  }, []);
+  
+  const sizeOptions = [
+    { data: 4, label: "4 GB（默认）" },
+    { data: 8, label: "8 GB" },
+    { data: 16, label: "16 GB" },
+    { data: 32, label: "32 GB" },
+    { data: memorySize, label: `${memorySize} GB（匹配内存）` },
+  ].filter((option, index, self) => 
+    index === self.findIndex((t) => t.data === option.data)
+  );
+  
+  const handleCreate = async () => {
+    setCreating(true);
+    try {
+      const result = await Backend.makeSwapfileWithSize(swapSize);
+      if (result.success) {
+        SteamUtils.simpleToast(`创建 ${swapSize}GB swapfile 成功，请重启系统`);
+        closeModal?.();
+      } else {
+        SteamUtils.simpleToast(`创建失败: ${result.message}`);
+      }
+    } catch (e) {
+      SteamUtils.simpleToast(`创建失败: ${e}`);
+    } finally {
+      setCreating(false);
+    }
+  };
+  
+  const description = (
+    <div>
+      <DropdownItem
+        label="选择大小"
+        rgOptions={sizeOptions}
+        selectedOption={swapSize}
+        onChange={(option) => setSwapSize(option.data)}
+      />
+      <div style={{ marginTop: "12px", fontSize: "0.9em", opacity: 0.8 }}>
+        • 系统内存: {memorySize}GB
+        <br />
+        • 休眠需要 swap ≥ 内存大小
+        <br />
+        • 创建后需要重启系统生效
+      </div>
+    </div>
+  );
+  
+  return (
+    <ConfirmModal
+      strTitle="自定义 Swap 大小"
+      strDescription={description}
+      strOKButtonText={creating ? "创建中..." : "确认创建"}
+      strCancelButtonText="取消"
+      onOK={handleCreate}
+      onCancel={closeModal}
+      closeModal={closeModal}
+      bOKDisabled={creating}
+      bCancelDisabled={creating}
+    />
+  );
+};

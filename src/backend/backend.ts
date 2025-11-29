@@ -484,4 +484,17 @@ export class Backend {
       };
     }
   }
+
+  // make_swapfile_with_size
+  public static async makeSwapfileWithSize(sizeGb: number): Promise<HibernateResult> {
+    try {
+      return (await call("make_swapfile_with_size", sizeGb)) as HibernateResult;
+    } catch (e) {
+      console.error(`makeSwapfileWithSize error: ${e}`);
+      return {
+        success: false,
+        message: `创建失败: ${e}`,
+      };
+    }
+  }
 }

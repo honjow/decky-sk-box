@@ -56,10 +56,24 @@ export const ToolComponent: FC = () => {
       setHibernateReadiness(readiness);
       
       if (!readiness.can_hibernate) {
+        // If swap is insufficient but active, offer to create larger swap
+        if (!readiness.checks.swap_size_ok && readiness.checks.swap_active) {
+          const requiredSize = Math.ceil(readiness.info.mem_total_gb);
+          showModal(
+            <SwapInsufficientModal 
+              currentSize={readiness.info.swap_total_gb}
+              requiredSize={requiredSize}
+            />
+          );
+          return;
+        }
+        
+        // Other errors, show simple toast
         SteamUtils.simpleToast(`无法休眠: ${readiness.reason}`);
         return;
       }
       
+      // Can hibernate, show confirmation modal
       showModal(<HibernateConfirmModal readiness={readiness} />);
     } catch (e) {
       console.error(`Failed to check hibernate readiness: ${e}`);
@@ -78,10 +92,12 @@ export const ToolComponent: FC = () => {
       return "加载中...";
     }
     
-    // reason already contains memory and swap info, no need to duplicate
     let desc = hibernateReadiness.reason;
     
-    if (!hibernateReadiness.can_hibernate && hibernateReadiness.suggestions.length > 0) {
+    // If swap is insufficient, simplify the hint (clicking will auto-guide)
+    if (!hibernateReadiness.can_hibernate && !hibernateReadiness.checks.swap_size_ok && hibernateReadiness.checks.swap_active) {
+      desc += "\n\n点击后会引导创建足够大小的 swap";
+    } else if (!hibernateReadiness.can_hibernate && hibernateReadiness.suggestions.length > 0) {
       desc += `\n\n解决方案:\n${hibernateReadiness.suggestions.join('\n')}`;
     }
     
@@ -101,7 +117,7 @@ export const ToolComponent: FC = () => {
         <ActionButtonItem
           onClick={handleHibernate}
           debugLabel="hibernate"
-          disabled={!hibernateReadiness?.can_hibernate || hibernateChecking}
+          disabled={hibernateChecking}
           loading={hibernateChecking}
           description={getHibernateDescription()}
         >
@@ -302,6 +318,72 @@ export const HibernateConfirmModal: FC<HibernateConfirmModalProps> = ({
       closeModal={closeModal}
       bOKDisabled={hibernating}
       bCancelDisabled={hibernating}
+    />
+  );
+};
+
+export interface SwapInsufficientModalProps {
+  closeModal?: () => void;
+  currentSize: number;
+  requiredSize: number;
+}
+
+export const SwapInsufficientModal: FC<SwapInsufficientModalProps> = ({
+  closeModal,
+  currentSize,
+  requiredSize,
+}) => {
+  const [creating, setCreating] = useState<boolean>(false);
+
+  const handleCreate = async () => {
+    setCreating(true);
+    try {
+      const result = await Backend.makeSwapfileWithSize(requiredSize);
+      if (result.success) {
+        SteamUtils.simpleToast("Swap 创建成功，请重启系统后使用休眠功能");
+        closeModal?.();
+      } else {
+        SteamUtils.simpleToast(`创建失败: ${result.message}`);
+      }
+    } catch (e) {
+      SteamUtils.simpleToast(`创建失败: ${e}`);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const description = (
+    <div>
+      <div>当前 Swap: {currentSize}GB</div>
+      <div>需要: {requiredSize}GB</div>
+      <div style={{ marginTop: "12px", fontSize: "0.9em", opacity: 0.8 }}>
+        要使用休眠功能，需要创建更大的 swap。
+        <br />
+        是否立即创建 {requiredSize}GB 的 swapfile？
+        <br />
+        <br />
+        注意：
+        <br />
+        • 创建后需要重启系统生效
+        <br />
+        • 会自动配置 resume 内核参数
+        <br />
+        • 不会改变默认睡眠按钮的行为
+      </div>
+    </div>
+  );
+
+  return (
+    <ConfirmModal
+      strTitle="Swap 不足"
+      strDescription={description}
+      strOKButtonText={creating ? "创建中..." : "创建并配置"}
+      strCancelButtonText="取消"
+      onOK={handleCreate}
+      onCancel={closeModal}
+      closeModal={closeModal}
+      bOKDisabled={creating}
+      bCancelDisabled={creating}
     />
   );
 };

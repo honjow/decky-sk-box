@@ -274,6 +274,18 @@ class Plugin:
             logging.error(f"Error making swapfile: {e}")
             return False
 
+    async def make_swapfile_with_size(self, size_gb: int):
+        """Create swapfile with specified size"""
+        logging.info(f"User requested swapfile creation with size: {size_gb}GB")
+        try:
+            success, msg = utils.make_swapfile_with_size(size_gb)
+            if not success:
+                logging.error(f"Swapfile creation failed: {msg}")
+            return {'success': success, 'message': msg}
+        except Exception as e:
+            logging.error(f"Error creating swapfile: {e}", exc_info=True)
+            return {'success': False, 'message': str(e)}
+
     async def reset_gnome(self):
         logging.info("Resetting gnome")
         try:
