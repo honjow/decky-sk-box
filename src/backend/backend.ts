@@ -17,6 +17,37 @@ export interface MotionPoint {
   is_added: boolean;
 }
 
+export interface HibernateInfo {
+  mem_total_gb: number;
+  swap_total_gb: number;
+  swap_devices: Array<{
+    device: string;
+    type: string;
+    size_kb: number;
+    used_kb: number;
+    is_zram: boolean;
+  }>;
+  resume_device: string | null;
+  resume_offset: string | null;
+}
+
+export interface HibernateReadiness {
+  can_hibernate: boolean;
+  reason: string;
+  checks: {
+    swap_size_ok: boolean;
+    resume_configured: boolean;
+    swap_active: boolean;
+  };
+  info: HibernateInfo;
+  suggestions: string[];
+}
+
+export interface HibernateResult {
+  success: boolean;
+  message: string;
+}
+
 export class Backend {
   public static async init() {}
 
@@ -412,6 +443,45 @@ export class Backend {
     } catch (e) {
       console.error(`getCurrentVulkanAdapter error: ${e}`);
       return "";
+    }
+  }
+
+  // get_hibernate_readiness
+  public static async getHibernateReadiness(): Promise<HibernateReadiness> {
+    try {
+      return (await call("get_hibernate_readiness")) as HibernateReadiness;
+    } catch (e) {
+      console.error(`getHibernateReadiness error: ${e}`);
+      return {
+        can_hibernate: false,
+        reason: "检查失败",
+        checks: {
+          swap_size_ok: false,
+          resume_configured: false,
+          swap_active: false,
+        },
+        info: {
+          mem_total_gb: 0,
+          swap_total_gb: 0,
+          swap_devices: [],
+          resume_device: null,
+          resume_offset: null,
+        },
+        suggestions: [],
+      };
+    }
+  }
+
+  // execute_hibernate
+  public static async executeHibernate(): Promise<HibernateResult> {
+    try {
+      return (await call("execute_hibernate")) as HibernateResult;
+    } catch (e) {
+      console.error(`executeHibernate error: ${e}`);
+      return {
+        success: false,
+        message: `执行失败: ${e}`,
+      };
     }
   }
 }

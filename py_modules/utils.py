@@ -789,3 +789,175 @@ def parse_config_file_with_comments(config_file):
                 pending_metadata = {}
     
     return config_structure
+
+
+def get_hibernate_readiness():
+    """
+    Check if system is ready for hibernation
+    
+    Returns:
+        dict: {
+            'can_hibernate': bool,
+            'reason': str,
+            'checks': {...},
+            'info': {...},
+            'suggestions': [...]
+        }
+    """
+    result = {
+        'can_hibernate': False,
+        'reason': '',
+        'checks': {
+            'swap_size_ok': False,
+            'resume_configured': False,
+            'swap_active': False,
+        },
+        'info': {
+            'mem_total_gb': 0,
+            'swap_total_gb': 0,
+            'swap_devices': [],
+            'resume_device': None,
+            'resume_offset': None,
+        },
+        'suggestions': []
+    }
+    
+    try:
+        # 1. Get physical memory size using dmidecode (same method as sk-mkswapfile)
+        # This includes GPU memory and matches what the swapfile creation script uses
+        try:
+            # Use subprocess directly to get stdout
+            cmd = "sudo dmidecode -t 17 | tr -d '\t' | grep '^Size: [0-9]* [MG]B' | awk '{print $2}'"
+            proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5, env=get_env())
+            ram_output = proc.stdout.strip()
+            
+            if ram_output:
+                ram_lines = ram_output.strip().split('\n')
+                # dmidecode outputs numbers in GB, sum them up (same as sk-mkswapfile: awk '{sum += $1} END {print sum}')
+                ram_size_gb = 0
+                for line in ram_lines:
+                    line = line.strip()
+                    if line and line.isdigit():
+                        ram_size_gb += int(line)
+                        logger.info(f"Adding memory module: {line} GB")
+                
+                if ram_size_gb > 0:
+                    result['info']['mem_total_gb'] = float(ram_size_gb)
+                    logger.info(f"Total memory from dmidecode: {ram_size_gb} GB")
+                else:
+                    raise ValueError(f"dmidecode returned 0 or invalid memory size, output: {ram_output}")
+            else:
+                raise ValueError("dmidecode returned empty output")
+        except Exception as e:
+            logger.warning(f"Failed to get memory size from dmidecode, falling back to /proc/meminfo: {e}")
+            # Fallback to /proc/meminfo if dmidecode fails
+            with open('/proc/meminfo', 'r') as f:
+                for line in f:
+                    if 'MemTotal:' in line:
+                        mem_kb = int(line.split()[1])
+                        result['info']['mem_total_gb'] = round(mem_kb / 1024 / 1024, 1)
+                        break
+        
+        # 2. Get swap size (excluding zram devices)
+        swap_total_kb = 0
+        try:
+            with open('/proc/swaps', 'r') as f:
+                lines = f.readlines()[1:]  # Skip header
+                for line in lines:
+                    parts = line.split()
+                    if len(parts) >= 3:
+                        device = parts[0]
+                        swap_type = parts[1]
+                        size_kb = int(parts[2])
+                        
+                        # Skip zram devices
+                        if '/dev/zram' not in device:
+                            swap_total_kb += size_kb
+                            
+                        result['info']['swap_devices'].append({
+                            'device': device,
+                            'type': swap_type,
+                            'size_kb': size_kb,
+                            'used_kb': int(parts[3]),
+                            'is_zram': '/dev/zram' in device,
+                        })
+            
+            result['info']['swap_total_gb'] = round(swap_total_kb / 1024 / 1024, 1)
+        except Exception as e:
+            logger.warning(f"Failed to get swap info from /proc/swaps: {e}")
+        
+        # 2. Check if swap is active (excluding zram)
+        result['checks']['swap_active'] = result['info']['swap_total_gb'] > 0
+        if not result['checks']['swap_active']:
+            result['reason'] = "Swap 未激活"
+            result['suggestions'].append("请在高级设置中创建 swapfile")
+            return result
+        
+        # 3. Check if swap size is sufficient
+        result['checks']['swap_size_ok'] = (
+            result['info']['swap_total_gb'] >= result['info']['mem_total_gb']
+        )
+        if not result['checks']['swap_size_ok']:
+            result['reason'] = f"Swap 不足 ({result['info']['swap_total_gb']}GB < {result['info']['mem_total_gb']}GB)"
+            result['suggestions'].append("请在高级设置中重建 swapfile，系统会自动创建足够大小的 swap")
+            return result
+        
+        # 4. Check kernel cmdline for resume configuration
+        # 4. Check kernel cmdline for resume configuration
+        try:
+            with open('/proc/cmdline', 'r') as f:
+                cmdline = f.read()
+                
+                # Find resume= parameter
+                import re
+                resume_match = re.search(r'resume=([^\s]+)', cmdline)
+                if resume_match:
+                    result['info']['resume_device'] = resume_match.group(1)
+                    result['checks']['resume_configured'] = True
+                
+                # Find resume_offset= parameter (for swapfile)
+                offset_match = re.search(r'resume_offset=([^\s]+)', cmdline)
+                if offset_match:
+                    result['info']['resume_offset'] = offset_match.group(1)
+        except Exception as e:
+            logger.warning(f"读取内核参数失败: {e}")
+        
+        # 5. Check if resume parameter is configured
+        if not result['checks']['resume_configured']:
+            result['reason'] = "休眠恢复参数未配置 (缺少 resume 内核参数)"
+            result['suggestions'].append("内核参数中缺少 resume 配置，休眠后将无法恢复")
+            result['suggestions'].append("请在高级设置中重建 swapfile，系统会自动配置 resume 参数")
+            result['suggestions'].append("或者在终端运行: sudo sk-setup-kernel-options 然后重启")
+            return result
+        
+        # 6. All checks passed
+        result['can_hibernate'] = True
+        resume_info = result['info']['resume_device']
+        if result['info']['resume_offset']:
+            resume_info += f" (offset: {result['info']['resume_offset']})"
+        result['reason'] = f"系统已就绪 (物理内存: {result['info']['mem_total_gb']}GB, Swap: {result['info']['swap_total_gb']}GB)"
+        
+    except Exception as e:
+        logger.error(f"检查休眠准备情况失败: {e}", exc_info=True)
+        result['reason'] = f"检查失败: {str(e)}"
+        
+    return result
+
+
+def execute_hibernate():
+    """Execute system hibernation"""
+    logger.info("开始执行系统休眠")
+    try:
+        # Check if system is ready to hibernate
+        readiness = get_hibernate_readiness()
+        if not readiness['can_hibernate']:
+            logger.warning(f"系统未准备好休眠: {readiness['reason']}")
+            return False, readiness['reason']
+        
+        # Execute hibernate
+        command = "systemctl hibernate"
+        success, ret_msg = run_command(command, "执行休眠")
+        return success, ret_msg
+    except Exception as e:
+        logger.error(f"休眠执行失败: {e}", exc_info=True)
+        return False, str(e)

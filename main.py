@@ -432,6 +432,34 @@ class Plugin:
             logging.error(f"Error getting current Vulkan adapter: {e}", exc_info=True)
             return ""
 
+    # get_hibernate_readiness
+    async def get_hibernate_readiness(self):
+        """Get hibernate readiness check result"""
+        try:
+            return utils.get_hibernate_readiness()
+        except Exception as e:
+            logging.error(f"Error checking hibernate readiness: {e}", exc_info=True)
+            return {
+                'can_hibernate': False,
+                'reason': f'检查失败: {str(e)}',
+                'checks': {},
+                'info': {},
+                'suggestions': []
+            }
+
+    # execute_hibernate
+    async def execute_hibernate(self):
+        """Execute system hibernation"""
+        logging.info("User requested system hibernation")
+        try:
+            success, msg = utils.execute_hibernate()
+            if not success:
+                logging.error(f"Hibernate failed: {msg}")
+            return {'success': success, 'message': msg}
+        except Exception as e:
+            logging.error(f"Error executing hibernate: {e}", exc_info=True)
+            return {'success': False, 'message': str(e)}
+
 
 
     # Migrations that should be performed before entering `_main()`.
