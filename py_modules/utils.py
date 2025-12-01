@@ -617,7 +617,7 @@ def boot_bios():
 
 
 def toggle_handheld_service(service_name, enable: bool):
-    all_services = ["handycon.service", "inputplumber.service", f"hhd@{USER}.service"]
+    all_services = ["handycon.service", "inputplumber.service", f"hhd@{USER}.service", "hhd.service"]
     for service in all_services:
         if enable:
             _mask = service != service_name

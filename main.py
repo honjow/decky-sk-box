@@ -79,11 +79,12 @@ class Plugin:
             return False
 
     async def get_hhd_enabled(self):
-        return utils.service_is_enabled(f"hhd@{USER}.service")
+        return utils.service_is_enabled(f"hhd@{USER}.service") or utils.service_is_enabled("hhd.service")
 
     async def set_hhd_enabled(self, enabled: bool):
         try:
-            utils.toggle_handheld_service(f"hhd@{USER}.service", enabled)
+            utils.toggle_handheld_service(f"hhd@{USER}.service", not enabled)
+            utils.toggle_handheld_service("hhd.service", enabled)
             return True
         except Exception as e:
             logging.error(f"Error setting HHD enabled: {e}", exc_info=True)
