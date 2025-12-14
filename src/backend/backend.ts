@@ -497,4 +497,24 @@ export class Backend {
       };
     }
   }
+
+  // get_current_orientation
+  public static async getCurrentOrientation(): Promise<string> {
+    try {
+      return (await call("get_current_orientation")) as string;
+    } catch (e) {
+      console.error(`getCurrentOrientation error: ${e}`);
+      return "";
+    }
+  }
+
+  // set_orientation_override
+  public static async setOrientationOverride(orientation: string): Promise<boolean> {
+    try {
+      return (await call("set_orientation_override", orientation)) as boolean;
+    } catch (e) {
+      console.error(`setOrientationOverride error: ${e}`);
+      return false;
+    }
+  }
 }

@@ -92,6 +92,9 @@ export class Settings {
   public static gpuDevices: any[] = [];
   public static currentVulkanAdapter = "";
 
+  // Orientation override相关缓存
+  public static currentOrientation = "";
+
   // 私有构造函数，防止实例化
   private constructor() {}
 

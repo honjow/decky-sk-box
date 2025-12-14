@@ -12,6 +12,7 @@ export const useAdvance = () => {
     const [supportUmaf, setSupportUmaf] = useState(Settings.supportUmaf);
     const [gpuDevices, setGpuDevices] = useState<GpuDevice[]>(Settings.gpuDevices);
     const [currentVulkanAdapter, setCurrentVulkanAdapter] = useState<string>(Settings.currentVulkanAdapter);
+    const [currentOrientation, setCurrentOrientation] = useState<string>(Settings.currentOrientation);
 
     useEffect(() => {
         Settings.enableFirmwareOverride = enableFirmwareOverride;
@@ -27,12 +28,14 @@ export const useAdvance = () => {
             const _supportUmaf = await Backend.supportUmaf();
             const _gpuDevices = await Backend.getGpuDevices();
             const _currentVulkanAdapter = await Backend.getCurrentVulkanAdapter();
+            const _currentOrientation = await Backend.getCurrentOrientation();
 
             setEnableFirmwareOverride(_enableFirmwareOverride);
             setEnableUSBWakeup(_enableUSBWakeup);
             setSupportUmaf(_supportUmaf);
             setGpuDevices(_gpuDevices);
             setCurrentVulkanAdapter(_currentVulkanAdapter);
+            setCurrentOrientation(_currentOrientation);
 
             // 更新Settings缓存
             Settings.enableFirmwareOverride = _enableFirmwareOverride;
@@ -40,6 +43,7 @@ export const useAdvance = () => {
             Settings.supportUmaf = _supportUmaf;
             Settings.gpuDevices = _gpuDevices;
             Settings.currentVulkanAdapter = _currentVulkanAdapter;
+            Settings.currentOrientation = _currentOrientation;
         };
         getDate();
     }, []);
@@ -73,6 +77,26 @@ export const useAdvance = () => {
         }
     };
 
+    const updateOrientationOverride = async (enable: boolean, orientation: string = "") => {
+        try {
+            if (enable && orientation) {
+                const success = await Backend.setOrientationOverride(orientation);
+                if (success) {
+                    setCurrentOrientation(orientation);
+                    Settings.currentOrientation = orientation;
+                }
+            } else {
+                const success = await Backend.setOrientationOverride("");
+                if (success) {
+                    setCurrentOrientation("");
+                    Settings.currentOrientation = "";
+                }
+            }
+        } catch (e) {
+            console.error(`updateOrientationOverride error: ${e}`);
+        }
+    };
+
     return {
         enableFirmwareOverride,
         updateFirmwareOverride,
@@ -82,5 +106,7 @@ export const useAdvance = () => {
         gpuDevices,
         currentVulkanAdapter,
         updateVulkanAdapter,
+        currentOrientation,
+        updateOrientationOverride,
     };
 };

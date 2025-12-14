@@ -1,4 +1,5 @@
 import logging
+import os
 
 import decky
 from logging_handler import SystemdHandler
@@ -54,3 +55,7 @@ ASUS_ALLY_HID_MOD_NAME = "asus_ally_hid"
 CONFIG_KEY = "sk-box"
 
 HIBERNATE_DELAY_FILE = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf"
+
+# Orientation override config
+ORIENTATION_ENV_DIR = os.path.join(USER_HOME, ".config", "environment.d")
+ORIENTATION_CONFIG_FILE = os.path.join(ORIENTATION_ENV_DIR, "zzz-decky-skbox.conf")

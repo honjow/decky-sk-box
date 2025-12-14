@@ -28,6 +28,8 @@ export const AdvanceComponent: FC = () => {
     gpuDevices,
     currentVulkanAdapter,
     updateVulkanAdapter,
+    currentOrientation,
+    updateOrientationOverride,
   } = useAdvance();
 
   useEffect(() => {
@@ -37,6 +39,13 @@ export const AdvanceComponent: FC = () => {
   useEffect(() => {
     Settings.swapfileMaking = swapfileMaking;
   }, [swapfileMaking]);
+
+  const orientationOptions = [
+    { data: "left", label: "left" },
+    { data: "right", label: "right" },
+    { data: "normal", label: "normal" },
+    { data: "upsidedown", label: "upsidedown" },
+  ];
 
   const handBootRepair = async () => {
     await Backend.bootRepair();
@@ -104,6 +113,35 @@ export const AdvanceComponent: FC = () => {
         </ButtonItem>
       </PanelSectionRow>
       {showAdvance && <>
+        {/* 显示方向覆盖设置 - 放在最前面 */}
+        <PanelSectionRow>
+          <ToggleField
+            label={"覆盖游戏模式显示方向"}
+            description={"开启后可手动指定显示方向，重启后生效"}
+            checked={currentOrientation !== ""}
+            onChange={async (checked) => {
+              if (checked) {
+                const orientation = currentOrientation || "normal";
+                await updateOrientationOverride(true, orientation);
+              } else {
+                await updateOrientationOverride(false);
+              }
+            }}
+          />
+        </PanelSectionRow>
+        {currentOrientation && (
+          <PanelSectionRow>
+            <DropdownItem
+              label="显示方向"
+              rgOptions={orientationOptions}
+              selectedOption={currentOrientation}
+              onChange={async (option) => {
+                await updateOrientationOverride(true, option.data);
+              }}
+            />
+          </PanelSectionRow>
+        )}
+        
         <GpuSelector
           gpuDevices={gpuDevices}
           currentVulkanAdapter={currentVulkanAdapter}

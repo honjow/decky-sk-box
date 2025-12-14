@@ -473,6 +473,25 @@ class Plugin:
             logging.error(f"Error executing hibernate: {e}", exc_info=True)
             return {'success': False, 'message': str(e)}
 
+    # get_current_orientation
+    async def get_current_orientation(self):
+        """Get current orientation value"""
+        try:
+            return utils.get_current_orientation()
+        except Exception as e:
+            logging.error(f"Error getting current orientation: {e}")
+            return ""
+
+    # set_orientation_override
+    async def set_orientation_override(self, orientation: str):
+        """Set orientation override (left, right, normal, upsidedown, or empty to disable)"""
+        try:
+            logging.info(f"Setting orientation override: {orientation}")
+            return utils.set_orientation_override(orientation)
+        except Exception as e:
+            logging.error(f"Error setting orientation override: {e}")
+            return False
+
 
 
     # Migrations that should be performed before entering `_main()`.

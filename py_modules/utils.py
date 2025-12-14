@@ -14,6 +14,8 @@ import threading
 from config import (
     ASUS_ALLY_HID_MOD_NAME,
     HIBERNATE_DELAY_FILE,
+    ORIENTATION_CONFIG_FILE,
+    ORIENTATION_ENV_DIR,
     SK_TOOL_SCRIPTS_PATH,
     USER,
     USER_HOME,
@@ -991,3 +993,66 @@ def execute_hibernate():
     except Exception as e:
         logger.error(f"休眠执行失败: {e}", exc_info=True)
         return False, str(e)
+
+
+def get_current_orientation():
+    """Get current orientation value, empty string means disabled"""
+    if not os.path.isfile(ORIENTATION_CONFIG_FILE):
+        return ""
+    
+    try:
+        with open(ORIENTATION_CONFIG_FILE, "r") as f:
+            for line in f:
+                if line.startswith("ORIENTATION="):
+                    return line.split('=')[1].strip()
+        return ""
+    except Exception as e:
+        logger.error(f"Error getting orientation: {e}")
+        return ""
+
+
+def set_orientation_override(orientation):
+    """Set or clear ORIENTATION environment variable in user's environment.d
+    
+    Args:
+        orientation: The orientation value (left, right, normal, upsidedown) or empty string to disable
+    """
+    try:
+        # Create directory if not exists
+        os.makedirs(ORIENTATION_ENV_DIR, exist_ok=True)
+        
+        # Read existing content
+        existing_content = ""
+        if os.path.isfile(ORIENTATION_CONFIG_FILE):
+            with open(ORIENTATION_CONFIG_FILE, "r") as f:
+                existing_content = f.read()
+        
+        # Build new content
+        lines = existing_content.split('\n') if existing_content else []
+        new_lines = [line for line in lines if line and not line.startswith("ORIENTATION=")]
+        
+        if orientation:
+            new_lines.append(f"ORIENTATION={orientation}")
+        
+        # Write to file or remove if empty
+        if new_lines:
+            with open(ORIENTATION_CONFIG_FILE, "w") as f:
+                f.write('\n'.join(new_lines) + '\n')
+            
+            # Get user info and set correct ownership
+            user_info = pwd.getpwnam(USER)
+            os.chown(ORIENTATION_CONFIG_FILE, user_info.pw_uid, user_info.pw_gid)
+            os.chmod(ORIENTATION_CONFIG_FILE, 0o644)
+            
+            logger.info(f"ORIENTATION {'set to ' + orientation if orientation else 'cleared'}")
+        else:
+            # If no content, remove the file
+            if os.path.isfile(ORIENTATION_CONFIG_FILE):
+                os.remove(ORIENTATION_CONFIG_FILE)
+                logger.info("Removed empty orientation config file")
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error setting orientation: {e}")
+        return False
