@@ -236,7 +236,7 @@ def set_ignore_handle_power_key(enabled):
     if enabled:
         # 写入文件
         with open(file_path, "w") as file:
-            file.write("[Login]\nHandlePowerKey=ignore")
+            file.write("[Login]\nHandlePowerKey=ignore\n")
     else:
         # 删除文件
         if os.path.isfile(file_path):
