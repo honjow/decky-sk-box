@@ -231,6 +231,19 @@ def chk_hibernate():
     return False
 
 
+def set_ignore_handle_power_key(enabled):
+    file_path = "/etc/systemd/logind.conf.d/zzz-handle-power-key-ignore.conf"
+    if enabled:
+        # 写入文件
+        with open(file_path, "w") as file:
+            file.write("[Login]\nHandlePowerKey=ignore")
+    else:
+        # 删除文件
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    run_command("sudo systemctl daemon-reload")
+    run_command("sudo systemctl kill -s HUP systemd-logind")
+
 def set_hibernate(enabled):
     old_file = "/etc/systemd/sleep.conf.d/sleep.conf"
     # 判断文件是否存在
@@ -638,6 +651,9 @@ def toggle_handheld_service(service_name, enable: bool):
         # ROG Ally X RC72L 在启用 inputplumber.service 时需要开启 asus_ally_hid 模块.否则需要关闭
         if service == "inputplumber.service" and "ROG Ally X RC72L" in get_product_name():
             toggle_mod_enable(ASUS_ALLY_HID_MOD_NAME, _enable)
+
+        if "inputplumber" in service:
+            set_ignore_handle_power_key(_enable)
 
 def toggle_mod_enable(mod_name, enable: bool):
     run_command("depmod -a")
