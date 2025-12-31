@@ -1,6 +1,6 @@
 {
   "name": "decky-sk-box",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Decky plugins for Sk-ChimeraOS",
   "type": "module",
   "scripts": {
@@ -36,7 +36,7 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@types/webpack": "^5.28.5",
-    "rollup": "^4.53.3",
+    "rollup": "^4.54.0",
     "shx": "^0.4.0",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3"
