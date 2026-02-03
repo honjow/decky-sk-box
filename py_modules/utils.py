@@ -870,40 +870,66 @@ def get_hibernate_readiness():
     }
     
     try:
-        # 1. Get physical memory size using dmidecode (same method as sk-mkswapfile)
+        # 1. Get physical memory size using multiple methods with fallbacks
         # This includes GPU memory and matches what the swapfile creation script uses
+        ram_size_gb = 0
+        
+        # Method 1: dmidecode -t 19 (Memory Array Mapped Address) - most reliable, direct total
         try:
-            # Use subprocess directly to get stdout
-            cmd = "sudo dmidecode -t 17 | tr -d '\t' | grep '^Size: [0-9]* [MG]B' | awk '{print $2}'"
+            cmd = "sudo dmidecode -t 19 2>/dev/null | grep -E 'Range Size:' | head -1 | grep -oE '[0-9]+' | head -1"
             proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5, env=get_env())
-            ram_output = proc.stdout.strip()
-            
-            if ram_output:
-                ram_lines = ram_output.strip().split('\n')
-                # dmidecode outputs numbers in GB, sum them up (same as sk-mkswapfile: awk '{sum += $1} END {print sum}')
-                ram_size_gb = 0
-                for line in ram_lines:
-                    line = line.strip()
-                    if line and line.isdigit():
-                        ram_size_gb += int(line)
-                        logger.info(f"Adding memory module: {line} GB")
-                
-                if ram_size_gb > 0:
-                    result['info']['mem_total_gb'] = float(ram_size_gb)
-                    logger.info(f"Total memory from dmidecode: {ram_size_gb} GB")
-                else:
-                    raise ValueError(f"dmidecode returned 0 or invalid memory size, output: {ram_output}")
-            else:
-                raise ValueError("dmidecode returned empty output")
+            range_size = proc.stdout.strip()
+            if range_size and range_size.isdigit() and int(range_size) > 0:
+                ram_size_gb = int(range_size)
+                logger.info(f"Total memory from dmidecode -t 19: {ram_size_gb} GB")
         except Exception as e:
-            logger.warning(f"Failed to get memory size from dmidecode, falling back to /proc/meminfo: {e}")
-            # Fallback to /proc/meminfo if dmidecode fails
+            logger.debug(f"dmidecode -t 19 failed: {e}")
+        
+        # Method 2: dmidecode -t 17 (Memory Device) - sum all modules
+        if ram_size_gb == 0:
+            try:
+                cmd = "sudo dmidecode -t 17 2>/dev/null | tr -d '\t' | grep -E '^Size: [0-9]+ [MG]i?B' | awk '{print $2}'"
+                proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5, env=get_env())
+                ram_output = proc.stdout.strip()
+                
+                if ram_output:
+                    ram_lines = ram_output.strip().split('\n')
+                    for line in ram_lines:
+                        line = line.strip()
+                        if line and line.isdigit():
+                            ram_size_gb += int(line)
+                            logger.debug(f"Adding memory module: {line} GB")
+                    
+                    if ram_size_gb > 0:
+                        logger.info(f"Total memory from dmidecode -t 17: {ram_size_gb} GB")
+            except Exception as e:
+                logger.debug(f"dmidecode -t 17 failed: {e}")
+        
+        # Method 3: lshw as secondary fallback
+        if ram_size_gb == 0:
+            try:
+                cmd = "sudo lshw -class memory -short 2>/dev/null | grep -E 'System Memory' | grep -oE '[0-9]+GiB' | grep -oE '[0-9]+'"
+                proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10, env=get_env())
+                lshw_size = proc.stdout.strip()
+                if lshw_size and lshw_size.isdigit() and int(lshw_size) > 0:
+                    ram_size_gb = int(lshw_size)
+                    logger.info(f"Total memory from lshw: {ram_size_gb} GB")
+            except Exception as e:
+                logger.debug(f"lshw failed: {e}")
+        
+        # Method 4: /proc/meminfo as final fallback (returns available memory, not physical)
+        if ram_size_gb == 0:
+            logger.warning("Failed to get physical memory size, falling back to /proc/meminfo")
             with open('/proc/meminfo', 'r') as f:
                 for line in f:
                     if 'MemTotal:' in line:
                         mem_kb = int(line.split()[1])
-                        result['info']['mem_total_gb'] = round(mem_kb / 1024 / 1024, 1)
+                        # Round up to ensure sufficient swap
+                        ram_size_gb = (mem_kb + 1048575) // 1048576
+                        logger.info(f"Total memory from /proc/meminfo: {ram_size_gb} GB (available, not physical)")
                         break
+        
+        result['info']['mem_total_gb'] = float(ram_size_gb)
         
         # 2. Get swap size (excluding zram devices)
         swap_total_kb = 0
