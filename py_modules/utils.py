@@ -416,10 +416,58 @@ def etc_repair_full():
     return success, ret_msg
 
 
-def reset_gnome():
+def reset_dconf():
     command = "sudo dconf update && dconf reset -f /"
-    success, ret_msg = run_command(command, "重置 GNOME 桌面")
+    success, ret_msg = run_command(command, "重置 dconf")
     return success, ret_msg
+
+
+def has_gnome_shell():
+    """检查系统是否存在 GNOME Shell 环境"""
+    return os.path.exists("/usr/bin/gnome-shell")
+
+
+def _get_user_dconf_env():
+    """获取以普通用户身份运行 dconf 所需的命令前缀"""
+    uid = pwd.getpwnam(USER).pw_uid
+    bus_addr = f"unix:path=/run/user/{uid}/bus"
+    return f"sudo -u {USER} env DBUS_SESSION_BUS_ADDRESS={bus_addr}"
+
+
+def get_gnome_extensions_enabled():
+    """获取 GNOME 扩展是否启用（读取 disable-user-extensions 并取反）"""
+    try:
+        prefix = _get_user_dconf_env()
+        result = subprocess.run(
+            f"{prefix} dconf read /org/gnome/shell/disable-user-extensions",
+            shell=True,
+            capture_output=True,
+            text=True,
+            env=get_env(),
+        )
+        value = result.stdout.strip().lower()
+        # dconf 返回 'true' 表示禁用扩展，取反后返回
+        # 如果值为空（未设置），默认扩展是启用的
+        if value == "true":
+            return False
+        return True
+    except Exception as e:
+        logger.error(f"获取 GNOME 扩展状态失败: {e}")
+        return True
+
+
+def set_gnome_extensions_enabled(enabled: bool):
+    """设置 GNOME 扩展启用/禁用"""
+    try:
+        prefix = _get_user_dconf_env()
+        # disable-user-extensions: true 表示禁用，所以需要取反
+        disable_value = "false" if enabled else "true"
+        command = f"{prefix} dconf write /org/gnome/shell/disable-user-extensions {disable_value}"
+        success, ret_msg = run_command(command, "设置 GNOME 扩展状态")
+        return success
+    except Exception as e:
+        logger.error(f"设置 GNOME 扩展状态失败: {e}")
+        return False
 
 
 def chk_firmware_override():

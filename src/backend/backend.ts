@@ -272,9 +272,39 @@ export class Backend {
     return await call("make_swapfile");
   }
 
-  // reset_gnome
-  public static async resetGnome() {
-    return await call("reset_gnome");
+  // reset_dconf
+  public static async resetDconf() {
+    return await call("reset_dconf");
+  }
+
+  // has_gnome_shell
+  public static async hasGnomeShell(): Promise<boolean> {
+    try {
+      return (await call("has_gnome_shell")) as boolean;
+    } catch (e) {
+      console.error(`hasGnomeShell error: ${e}`);
+      return false;
+    }
+  }
+
+  // get_gnome_extensions_enabled
+  public static async getGnomeExtensionsEnabled(): Promise<boolean> {
+    try {
+      return (await call("get_gnome_extensions_enabled")) as boolean;
+    } catch (e) {
+      console.error(`getGnomeExtensionsEnabled error: ${e}`);
+      return true;
+    }
+  }
+
+  // set_gnome_extensions_enabled
+  public static async setGnomeExtensionsEnabled(value: boolean): Promise<boolean> {
+    try {
+      return (await call("set_gnome_extensions_enabled", value)) as boolean;
+    } catch (e) {
+      console.error(`setGnomeExtensionsEnabled error: ${e}`);
+      return false;
+    }
   }
 
   // get_settings

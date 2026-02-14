@@ -30,6 +30,9 @@ export const AdvanceComponent: FC = () => {
     updateVulkanAdapter,
     currentOrientation,
     updateOrientationOverride,
+    hasGnomeShell,
+    enableGnomeExtensions,
+    updateGnomeExtensions,
   } = useAdvance();
 
   useEffect(() => {
@@ -78,9 +81,9 @@ export const AdvanceComponent: FC = () => {
     }
   }
 
-  const handResetGnome = async () => {
-    await Backend.resetGnome();
-    console.log("resetGnome done");
+  const handResetDconf = async () => {
+    await Backend.resetDconf();
+    console.log("resetDconf done");
   }
 
   const handBootBios = async () => {
@@ -226,13 +229,23 @@ export const AdvanceComponent: FC = () => {
             自定义 Swap 大小
           </ActionButtonItem>
         </PanelSectionRow>
+        {hasGnomeShell && (
+          <PanelSectionRow>
+            <ToggleField
+              label={"GNOME 扩展"}
+              description={"开启或关闭 GNOME 扩展，桌面异常时可尝试关闭"}
+              checked={enableGnomeExtensions}
+              onChange={updateGnomeExtensions}
+            />
+          </PanelSectionRow>
+        )}
         <PanelSectionRow>
           <ActionButtonItem
-            description={"初始化 Gnome 桌面配置到默认状态"}
-            onClick={handResetGnome}
-            debugLabel="resetGnome"
+            description={"重置 dconf 配置，可将 Gnome 桌面恢复到默认状态"}
+            onClick={handResetDconf}
+            debugLabel="resetDconf"
           >
-            重置 Gnome 桌面
+            重置 dconf
           </ActionButtonItem>
         </PanelSectionRow>
       </>

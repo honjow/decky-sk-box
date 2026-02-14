@@ -95,6 +95,10 @@ export class Settings {
   // Orientation override相关缓存
   public static currentOrientation = "";
 
+  // GNOME相关缓存
+  public static hasGnomeShell = false;
+  public static enableGnomeExtensions = true;
+
   // 私有构造函数，防止实例化
   private constructor() {}
 

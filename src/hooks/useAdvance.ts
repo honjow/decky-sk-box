@@ -13,6 +13,8 @@ export const useAdvance = () => {
     const [gpuDevices, setGpuDevices] = useState<GpuDevice[]>(Settings.gpuDevices);
     const [currentVulkanAdapter, setCurrentVulkanAdapter] = useState<string>(Settings.currentVulkanAdapter);
     const [currentOrientation, setCurrentOrientation] = useState<string>(Settings.currentOrientation);
+    const [hasGnomeShell, setHasGnomeShell] = useState(Settings.hasGnomeShell);
+    const [enableGnomeExtensions, setEnableGnomeExtensions] = useState(Settings.enableGnomeExtensions);
 
     useEffect(() => {
         Settings.enableFirmwareOverride = enableFirmwareOverride;
@@ -29,6 +31,10 @@ export const useAdvance = () => {
             const _gpuDevices = await Backend.getGpuDevices();
             const _currentVulkanAdapter = await Backend.getCurrentVulkanAdapter();
             const _currentOrientation = await Backend.getCurrentOrientation();
+            const _hasGnomeShell = await Backend.hasGnomeShell();
+            const _enableGnomeExtensions = _hasGnomeShell
+                ? await Backend.getGnomeExtensionsEnabled()
+                : true;
 
             setEnableFirmwareOverride(_enableFirmwareOverride);
             setEnableUSBWakeup(_enableUSBWakeup);
@@ -36,6 +42,8 @@ export const useAdvance = () => {
             setGpuDevices(_gpuDevices);
             setCurrentVulkanAdapter(_currentVulkanAdapter);
             setCurrentOrientation(_currentOrientation);
+            setHasGnomeShell(_hasGnomeShell);
+            setEnableGnomeExtensions(_enableGnomeExtensions);
 
             // 更新Settings缓存
             Settings.enableFirmwareOverride = _enableFirmwareOverride;
@@ -44,6 +52,8 @@ export const useAdvance = () => {
             Settings.gpuDevices = _gpuDevices;
             Settings.currentVulkanAdapter = _currentVulkanAdapter;
             Settings.currentOrientation = _currentOrientation;
+            Settings.hasGnomeShell = _hasGnomeShell;
+            Settings.enableGnomeExtensions = _enableGnomeExtensions;
         };
         getDate();
     }, []);
@@ -97,6 +107,14 @@ export const useAdvance = () => {
         }
     };
 
+    const updateGnomeExtensions = async (enable: boolean) => {
+        const success = await Backend.setGnomeExtensionsEnabled(enable);
+        if (success) {
+            setEnableGnomeExtensions(enable);
+            Settings.enableGnomeExtensions = enable;
+        }
+    };
+
     return {
         enableFirmwareOverride,
         updateFirmwareOverride,
@@ -108,5 +126,8 @@ export const useAdvance = () => {
         updateVulkanAdapter,
         currentOrientation,
         updateOrientationOverride,
+        hasGnomeShell,
+        enableGnomeExtensions,
+        updateGnomeExtensions,
     };
 };

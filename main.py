@@ -287,13 +287,35 @@ class Plugin:
             logging.error(f"Error creating swapfile: {e}", exc_info=True)
             return {'success': False, 'message': str(e)}
 
-    async def reset_gnome(self):
-        logging.info("Resetting gnome")
+    async def reset_dconf(self):
+        logging.info("Resetting dconf")
         try:
-            utils.reset_gnome()
+            utils.reset_dconf()
             return True
         except Exception as e:
-            logging.error(f"Error resetting gnome: {e}")
+            logging.error(f"Error resetting dconf: {e}")
+            return False
+
+    async def has_gnome_shell(self):
+        try:
+            return utils.has_gnome_shell()
+        except Exception as e:
+            logging.error(f"Error checking gnome shell: {e}")
+            return False
+
+    async def get_gnome_extensions_enabled(self):
+        try:
+            return utils.get_gnome_extensions_enabled()
+        except Exception as e:
+            logging.error(f"Error getting gnome extensions state: {e}")
+            return True
+
+    async def set_gnome_extensions_enabled(self, enabled: bool):
+        logging.info(f"Setting GNOME extensions enabled: {enabled}")
+        try:
+            return utils.set_gnome_extensions_enabled(enabled)
+        except Exception as e:
+            logging.error(f"Error setting gnome extensions state: {e}")
             return False
 
     async def get_package_version(self, package_name):
