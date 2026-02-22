@@ -142,14 +142,14 @@ export const GeneralComponent: FC = () => {
               <ToggleField
                 label={"HHD"}
                 description={
-                  "Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 InputPlumber 同时使用. 请配合HHD Decky插件使用"
+                  "Handheld Daemon, 另一个手柄驱动程序。开启后会替代默认的 InputPlumber 使用，请配合HHD UI 进行详细设置"
                 }
                 checked={enableHHD}
                 onChange={updateHHD}
               />
             </PanelSectionRow>
           )}
-          {handyConInstalled && (
+          {/* {handyConInstalled && (
             <PanelSectionRow>
               <ToggleField
                 label={"HandyGCCS"}
@@ -158,8 +158,8 @@ export const GeneralComponent: FC = () => {
                 onChange={updateHandyCon}
               />
             </PanelSectionRow>
-          )}
-          {inputPlumberInstalled && (
+          )} */}
+          {/* {inputPlumberInstalled && (
             <PanelSectionRow>
               <ToggleField
                 label={"InputPlumber"}
@@ -168,7 +168,7 @@ export const GeneralComponent: FC = () => {
                 onChange={updateInputPlumber}
               />
             </PanelSectionRow>
-          )}
+          )} */}
           <PanelSectionRow>
             <SlowSliderField
               // @ts-ignore

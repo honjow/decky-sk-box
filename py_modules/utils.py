@@ -678,8 +678,23 @@ def boot_bios():
     command = "sudo systemctl reboot --firmware-setup"
     return run_command(command, "启动BIOS")
 
-
 def toggle_handheld_service(service_name, enable: bool):
+    hhd_conflict_manage_path = "/usr/bin/hhd-conflict-manage"
+    if os.path.exists(hhd_conflict_manage_path):
+        return toggle_handheld_service_simple(service_name, enable)
+    else:
+        return toggle_handheld_service_full(service_name, enable)
+
+def toggle_handheld_service_simple(service_name, enable: bool):
+    try:
+        toggle_service(service_name, enable)
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling handheld service: {e}")
+        return False
+
+
+def toggle_handheld_service_full(service_name, enable: bool):
     all_services = ["handycon.service", "inputplumber.service", f"hhd@{USER}.service", "hhd.service"]
     for service in all_services:
         if enable:
@@ -697,7 +712,7 @@ def toggle_handheld_service(service_name, enable: bool):
         #     toggle_service("steam-powerbuttond.service", _enable)
 
         # ROG Ally X RC72L 在启用 inputplumber.service 时需要开启 asus_ally_hid 模块.否则需要关闭
-        if service == "inputplumber.service" and "ROG Ally X RC72L" in get_product_name():
+        if service == "inputplumber.service" and "Ally X" in get_product_name():
             toggle_mod_enable(ASUS_ALLY_HID_MOD_NAME, _enable)
 
         if "inputplumber" in service:
