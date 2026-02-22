@@ -196,21 +196,21 @@ export const AdvanceComponent: FC = () => {
             修复 /etc (完全)
           </ActionButtonItem>
         </PanelSectionRow>
-        <PanelSectionRow>
+        {/* <PanelSectionRow>
           <ToggleField
             label={"firmware固件覆盖"}
             description={"启用DSDT、EDID覆盖等, 用于修复和优化部分掌机的问题，切换后需要重启生效。建议开启"}
             checked={enableFirmwareOverride}
             onChange={updateFirmwareOverride}
           />
-        </PanelSectionRow>
-        <PanelSectionRow>
+        </PanelSectionRow> */}
+        {/* <PanelSectionRow>
           <ToggleField
             label={"USB唤醒"}
             checked={enableUSBWakeup}
             onChange={updateUSBWakeup}
           />
-        </PanelSectionRow>
+        </PanelSectionRow> */}
 
         <PanelSectionRow>
           <ActionButtonItem
