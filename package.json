@@ -36,7 +36,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/webpack": "^5.28.5",
-    "rollup": "^4.57.1",
+    "rollup": "^4.59.0",
     "shx": "^0.4.0",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3"

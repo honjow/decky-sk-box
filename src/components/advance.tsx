@@ -20,10 +20,10 @@ export const AdvanceComponent: FC = () => {
   const [swapfileMaking, setSwapfileMaking] = useState<boolean>(Settings.swapfileMaking);
 
   const {
-    enableFirmwareOverride,
-    updateFirmwareOverride,
-    enableUSBWakeup,
-    updateUSBWakeup,
+    // enableFirmwareOverride,
+    // updateFirmwareOverride,
+    // enableUSBWakeup,
+    // updateUSBWakeup,
     supportUmaf,
     gpuDevices,
     currentVulkanAdapter,

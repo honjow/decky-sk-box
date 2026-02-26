@@ -1,4 +1,4 @@
-import { call } from "@decky/api";
+import { call, callable } from "@decky/api";
 import {
   FrzrConfigStructure,
   FrzrMetadata,
@@ -548,3 +548,8 @@ export class Backend {
     }
   }
 }
+
+export const logInfo = callable<[string], any>("log_info");
+export const logError = callable<[string], any>("log_error");
+export const logWarn = callable<[string], any>("log_warn");
+export const logDebug = callable<[string], any>("log_debug");

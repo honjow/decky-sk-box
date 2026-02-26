@@ -26,13 +26,7 @@ export const GeneralComponent: FC = () => {
     updateKeepBoot,
     enableHHD,
     updateHHD,
-    enableHandyCon,
-    updateHandyCon,
-    enableInputPlumber,
-    updateInputPlumber,
     hhdInstalled,
-    handyConInstalled,
-    inputPlumberInstalled,
     sleepMode,
     updateSleepMode,
     sessionMode,
@@ -131,7 +125,7 @@ export const GeneralComponent: FC = () => {
             <ToggleField
               label={"启动项守护服务"}
               description={
-                "开启后, 每次启动 Sk-Chimeraos 都会将自身启动项作为下次启动项, 解决双系统启动项维持问题。最好配合 Windows 启动到 Sk-Chimeraos 的功能使用, 否则建议关闭"
+                "开启后, 每次启动 SkorionOS 都会将自身启动项作为下次启动项, 解决双系统启动项维持问题。最好配合 Windows 启动到 SkorionOS 的功能使用, 否则建议关闭"
               }
               checked={enableKeepBoot}
               onChange={updateKeepBoot}
@@ -149,26 +143,6 @@ export const GeneralComponent: FC = () => {
               />
             </PanelSectionRow>
           )}
-          {/* {handyConInstalled && (
-            <PanelSectionRow>
-              <ToggleField
-                label={"HandyGCCS"}
-                description={"用来驱动部分掌机的手柄按钮, 不能和 HHD 同时使用."}
-                checked={enableHandyCon}
-                onChange={updateHandyCon}
-              />
-            </PanelSectionRow>
-          )} */}
-          {/* {inputPlumberInstalled && (
-            <PanelSectionRow>
-              <ToggleField
-                label={"InputPlumber"}
-                description={"奇美拉官方系统使用的控制器驱动, 不能和 HHD 同时使用."}
-                checked={enableInputPlumber}
-                onChange={updateInputPlumber}
-              />
-            </PanelSectionRow>
-          )} */}
           <PanelSectionRow>
             <SlowSliderField
               // @ts-ignore
