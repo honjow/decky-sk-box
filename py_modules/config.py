@@ -59,3 +59,8 @@ HIBERNATE_DELAY_FILE = "/etc/systemd/sleep.conf.d/99-hibernate_delay.conf"
 # Orientation override config
 ORIENTATION_ENV_DIR = os.path.join(USER_HOME, ".config", "environment.d")
 ORIENTATION_CONFIG_FILE = os.path.join(ORIENTATION_ENV_DIR, "zzz-decky-skbox.conf")
+
+logger.info(f"DECKY_USER: {USER}")
+logger.info(f"DECKY_USER_HOME: {USER_HOME}")
+
+API_URL = "https://api.github.com/repos/honjow/decky-sk-box/releases/latest"

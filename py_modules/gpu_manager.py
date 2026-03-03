@@ -1,7 +1,7 @@
 import os
 import subprocess
 import re
-import logging
+from config import logger
 import decky
 import pwd
 from typing import List, Dict
@@ -10,6 +10,7 @@ from typing import List, Dict
 class GpuManager:
     def __init__(self, user_home: str):
         """Initialize GPU Manager with user home directory"""
+        decky.logger.info("GPU Manager initialized")
         self.user_home = user_home
         self.env_dir = os.path.join(user_home, ".config", "environment.d")
         self.env_file = os.path.join(self.env_dir, "00-vulkan-device.conf")
@@ -18,13 +19,13 @@ class GpuManager:
         self.decky_user = decky.DECKY_USER
         self.decky_user_home = decky.DECKY_USER_HOME
         
-        logging.info(f"GPU Manager initialized with user_home: {user_home}")
-        logging.info(f"Decky user: {self.decky_user}, Decky user home: {self.decky_user_home}")
+        logger.info(f"GPU Manager initialized with user_home: {user_home}")
+        logger.info(f"Decky user: {self.decky_user}, Decky user home: {self.decky_user_home}")
 
     def get_gpu_devices(self) -> List[Dict[str, str]]:
         """Get available GPU devices from system"""
         try:
-            logging.info("Starting GPU device detection...")
+            logger.info("Starting GPU device detection...")
             
             result = subprocess.run(
                 ["lspci", "-vnn"], 
@@ -49,11 +50,11 @@ class GpuManager:
                             "vendorLabel": self._get_vendor_label(vendor_id)
                         })
             
-            logging.info(f"GPU detection completed. Found {len(gpu_devices)} devices")
+            logger.info(f"GPU detection completed. Found {len(gpu_devices)} devices")
             return gpu_devices
             
         except Exception as e:
-            logging.error(f"Error getting GPU devices: {e}", exc_info=True)
+            logger.error(f"Error getting GPU devices: {e}", exc_info=True)
             return []
 
     def set_vulkan_adapter(self, device_id: str) -> bool:
@@ -87,17 +88,17 @@ class GpuManager:
                 # 设置文件权限为644
                 os.chmod(self.env_file, 0o644)
                 
-                logging.info(f"File permissions updated: owner={self.decky_user}, permissions=644")
+                logger.info(f"File permissions updated: owner={self.decky_user}, permissions=644")
             else:
                 # If no content, remove the file entirely
                 if os.path.exists(self.env_file):
                     os.remove(self.env_file)
             
-            logging.info(f"VULKAN_ADAPTER {'set to ' + device_id if device_id else 'cleared'}")
+            logger.info(f"VULKAN_ADAPTER {'set to ' + device_id if device_id else 'cleared'}")
             return True
             
         except Exception as e:
-            logging.error(f"Error setting VULKAN_ADAPTER: {e}", exc_info=True)
+            logger.error(f"Error setting VULKAN_ADAPTER: {e}", exc_info=True)
             return False
 
     def get_current_vulkan_adapter(self) -> str:
@@ -113,7 +114,7 @@ class GpuManager:
             return ""
             
         except Exception as e:
-            logging.error(f"Error getting current VULKAN_ADAPTER: {e}", exc_info=True)
+            logger.error(f"Error getting current VULKAN_ADAPTER: {e}", exc_info=True)
             return ""
 
     def _extract_device_name(self, line: str) -> str:

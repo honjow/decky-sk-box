@@ -9,12 +9,12 @@ import boot_to_win
 import steam_util
 import desktop
 from settings import SettingsManager
+from gpu_manager import GpuManager
 from config import (
     logger,
     USER,
     CONFIG_KEY,
 )
-from gpu_manager import GpuManager
 
 
 class Plugin:
@@ -39,7 +39,7 @@ class Plugin:
         return update.update_latest()
 
     async def get_version(self):
-        return f"{decky.DECKY_PLUGIN_VERSION}"
+        return update.get_version()
 
     async def get_latest_version(self):
         try:
@@ -79,7 +79,9 @@ class Plugin:
             return False
 
     async def get_hhd_enabled(self):
-        return utils.service_is_enabled(f"hhd@{USER}.service") or utils.service_is_enabled("hhd.service")
+        return utils.service_is_enabled(
+            f"hhd@{USER}.service"
+        ) or utils.service_is_enabled("hhd.service")
 
     async def set_hhd_enabled(self, enabled: bool):
         try:
@@ -282,10 +284,10 @@ class Plugin:
             success, msg = utils.make_swapfile_with_size(size_gb)
             if not success:
                 logger.error(f"Swapfile creation failed: {msg}")
-            return {'success': success, 'message': msg}
+            return {"success": success, "message": msg}
         except Exception as e:
             logger.error(f"Error creating swapfile: {e}", exc_info=True)
-            return {'success': False, 'message': str(e)}
+            return {"success": False, "message": str(e)}
 
     async def reset_dconf(self):
         logger.info("Resetting dconf")
@@ -399,7 +401,7 @@ class Plugin:
         except Exception as e:
             logger.error(f"Error booting bios: {e}")
             return False
-    
+
     # get_product_name
     async def get_product_name(self):
         try:
@@ -407,7 +409,7 @@ class Plugin:
         except Exception as e:
             logger.error(f"Error getting product name: {e}")
             return ""
-        
+
     # get_vendor_name
     async def get_vendor_name(self):
         try:
@@ -415,7 +417,7 @@ class Plugin:
         except Exception as e:
             logger.error(f"Error getting vendor name: {e}")
             return ""
-    
+
     # can_switch_desktop_session
     async def can_switch_desktop_session(self):
         try:
@@ -475,11 +477,11 @@ class Plugin:
         except Exception as e:
             logger.error(f"Error checking hibernate readiness: {e}", exc_info=True)
             return {
-                'can_hibernate': False,
-                'reason': f'检查失败: {str(e)}',
-                'checks': {},
-                'info': {},
-                'suggestions': []
+                "can_hibernate": False,
+                "reason": f"检查失败: {str(e)}",
+                "checks": {},
+                "info": {},
+                "suggestions": [],
             }
 
     # execute_hibernate
@@ -490,10 +492,10 @@ class Plugin:
             success, msg = utils.execute_hibernate()
             if not success:
                 logger.error(f"Hibernate failed: {msg}")
-            return {'success': success, 'message': msg}
+            return {"success": success, "message": msg}
         except Exception as e:
             logger.error(f"Error executing hibernate: {e}", exc_info=True)
-            return {'success': False, 'message': str(e)}
+            return {"success": False, "message": str(e)}
 
     # get_current_orientation
     async def get_current_orientation(self):
@@ -567,7 +569,5 @@ class Plugin:
         # - `~/.local/share/decky-template/` all files and directories under this root are migrated to `decky_plugin.DECKY_PLUGIN_RUNTIME_DIR/`
         decky.migrate_runtime(
             os.path.join(decky.DECKY_HOME, "template"),
-            os.path.join(
-                decky.DECKY_USER_HOME, ".local", "share", "decky-template"
-            ),
+            os.path.join(decky.DECKY_USER_HOME, ".local", "share", "decky-template"),
         )

@@ -1,76 +1,90 @@
 import { useEffect, useState } from "react";
-import { Backend } from "../backend";
-import { Settings } from "../backend";
+import { Backend, Settings } from "../backend";
+import { getVersionCache, setVersionCache, getStaleVersionCache } from "../util/versionCache";
 
 export const useUpdate = () => {
-  const [currentVersion, setCurrentVersion] = useState<string>(
-    Settings.currentVersion
-  );
-  const [latestVersion, setLatestVersion] = useState<string>(
-    Settings.latestVersion
-  );
-
-  const [addonVersion, setAddonVersion] = useState<string>(
-    Settings.addonVersion
-  );
+  const [currentVersion, setCurrentVersion] = useState<string>(Settings.currentVersion);
+  const [latestVersion, setLatestVersion] = useState<string>(Settings.latestVersion);
+  const [addonVersion, setAddonVersion] = useState<string>(Settings.addonVersion);
   const [sktVersion, setSktVersion] = useState<string>(Settings.sktVersion);
-
   const [productName, setProductName] = useState<string>(Settings.productName);
   const [vendorName, setVendorName] = useState<string>(Settings.vendorName);
+  const [isChecking, setIsChecking] = useState<boolean>(false);
+  const [lastCheckTime, setLastCheckTime] = useState<number | null>(null);
+
+  const fetchVersions = async () => {
+    try {
+      const [current, latest] = await Promise.all([
+        Backend.getVersion(),
+        Backend.getLatestVersion(),
+      ]);
+      setCurrentVersion(current);
+      setLatestVersion(latest);
+      Settings.currentVersion = current;
+      Settings.latestVersion = latest;
+      setVersionCache(current, latest);
+      setLastCheckTime(Date.now());
+    } catch (e) {
+      console.error("fetchVersions error:", e);
+      const stale = getStaleVersionCache();
+      if (stale) {
+        setCurrentVersion(stale.currentVersion);
+        setLatestVersion(stale.latestVersion);
+        setLastCheckTime(stale.lastCheckTime);
+      }
+    }
+  };
+
+  const checkForUpdates = async () => {
+    setIsChecking(true);
+    try {
+      await fetchVersions();
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
   useEffect(() => {
-    const getData = async () => {
-      const latestVersion = await Backend.getLatestVersion();
-      setLatestVersion(latestVersion);
-      Settings.latestVersion = latestVersion;
-    };
-    getData();
-  });
+    const init = async () => {
+      const cache = getVersionCache();
+      if (cache) {
+        setCurrentVersion(cache.currentVersion);
+        setLatestVersion(cache.latestVersion);
+        setLastCheckTime(cache.lastCheckTime);
+        Settings.currentVersion = cache.currentVersion;
+        Settings.latestVersion = cache.latestVersion;
+      } else {
+        await fetchVersions();
+      }
 
-  useEffect(() => {
-    const getData = async () => {
-      const version = await Backend.getVersion();
-      setCurrentVersion(version);
-      Settings.currentVersion = version;
+      const [addon, skt, product, vendor] = await Promise.all([
+        Backend.getPackageVersion("sk-chos-addon"),
+        Backend.getPackageVersion("sk-chos-tool"),
+        Backend.getProductName(),
+        Backend.getVendorName(),
+      ]);
+      setAddonVersion(addon);
+      setSktVersion(skt);
+      setProductName(product);
+      setVendorName(vendor);
+      Settings.addonVersion = addon;
+      Settings.sktVersion = skt;
+      Settings.productName = product;
+      Settings.vendorName = vendor;
     };
-    getData();
-  });
 
-  useEffect(() => {
-    const getData = async () => {
-      const version = await Backend.getPackageVersion("sk-chos-addon");
-      setAddonVersion(version);
-      Settings.addonVersion = version;
-    };
-    getData();
-  });
+    init();
+  }, []);
 
-  useEffect(() => {
-    const getData = async () => {
-      const version = await Backend.getPackageVersion("sk-chos-tool");
-      setSktVersion(version);
-      Settings.sktVersion = version;
-    };
-    getData();
-  });
-
-  useEffect(() => {
-    const getData = async () => {
-      const productName = await Backend.getProductName();
-      setProductName(productName);
-      Settings.productName = productName;
-    };
-    getData();
-  });
-
-  useEffect(() => {
-    const getData = async () => {
-      const vendorName = await Backend.getVendorName();
-      setVendorName(vendorName);
-      Settings.vendorName = vendorName;
-    };
-    getData();
-  });
-
-  return { currentVersion, latestVersion, addonVersion, sktVersion, productName, vendorName };
+  return {
+    currentVersion,
+    latestVersion,
+    addonVersion,
+    sktVersion,
+    productName,
+    vendorName,
+    isChecking,
+    lastCheckTime,
+    checkForUpdates,
+  };
 };
