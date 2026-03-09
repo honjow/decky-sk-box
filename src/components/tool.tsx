@@ -274,20 +274,22 @@ export const HibernateConfirmModal: FC<HibernateConfirmModalProps> = ({
   const [hibernating, setHibernating] = useState<boolean>(false);
 
   const handleConfirm = async () => {
+    closeModal?.();
     setHibernating(true);
+    // sleep
+    await new Promise(resolve => setTimeout(resolve, 800));
     try {
       const result = await Backend.executeHibernate();
       if (!result.success) {
         SteamUtils.simpleToast(`休眠失败: ${result.message}`);
-        closeModal?.();
       }
       // If successful, system will hibernate and this code won't execute
     } catch (e) {
       console.error(`Hibernate error: ${e}`);
       SteamUtils.simpleToast(`休眠失败: ${e}`);
-      closeModal?.();
     } finally {
       setHibernating(false);
+      closeModal?.();
     }
   };
 
