@@ -1,6 +1,6 @@
 {
   "name": "decky-sk-box",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Decky plugins for SkorionOS",
   "type": "module",
   "scripts": {
