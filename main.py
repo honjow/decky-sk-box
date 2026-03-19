@@ -85,7 +85,7 @@ class Plugin:
 
     async def set_hhd_enabled(self, enabled: bool):
         try:
-            utils.toggle_handheld_service(f"hhd@{USER}.service", not enabled)
+            utils.toggle_handheld_service(f"hhd@{USER}.service", False)
             utils.toggle_handheld_service("hhd.service", enabled)
             return True
         except Exception as e:
