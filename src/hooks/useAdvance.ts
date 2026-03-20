@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { Backend, Settings, GpuDevice } from "../backend";
+import {
+  Backend,
+  BluetoothWakeupState,
+  Settings,
+  GpuDevice,
+} from "../backend";
 import { SteamUtils } from "../backend/steamUtils";
 
 export const useAdvance = () => {
@@ -15,6 +20,12 @@ export const useAdvance = () => {
     const [currentOrientation, setCurrentOrientation] = useState<string>(Settings.currentOrientation);
     const [hasGnomeShell, setHasGnomeShell] = useState(Settings.hasGnomeShell);
     const [enableGnomeExtensions, setEnableGnomeExtensions] = useState(Settings.enableGnomeExtensions);
+    const [bluetoothWakeup, setBluetoothWakeupState] = useState<BluetoothWakeupState>({
+        available: false,
+        enabled: false,
+        rule_present: false,
+        devices: [],
+    });
 
     useEffect(() => {
         Settings.enableFirmwareOverride = enableFirmwareOverride;
@@ -35,6 +46,7 @@ export const useAdvance = () => {
             const _enableGnomeExtensions = _hasGnomeShell
                 ? await Backend.getGnomeExtensionsEnabled()
                 : true;
+            const _bluetoothWakeup = await Backend.getBluetoothWakeupState();
 
             setEnableFirmwareOverride(_enableFirmwareOverride);
             setEnableUSBWakeup(_enableUSBWakeup);
@@ -44,6 +56,7 @@ export const useAdvance = () => {
             setCurrentOrientation(_currentOrientation);
             setHasGnomeShell(_hasGnomeShell);
             setEnableGnomeExtensions(_enableGnomeExtensions);
+            setBluetoothWakeupState(_bluetoothWakeup);
 
             // 更新Settings缓存
             Settings.enableFirmwareOverride = _enableFirmwareOverride;
@@ -115,6 +128,15 @@ export const useAdvance = () => {
         }
     };
 
+    const updateBluetoothWakeup = async (enable: boolean) => {
+        const result = await Backend.setBluetoothWakeup(enable);
+        if (result.success) {
+            setBluetoothWakeupState(await Backend.getBluetoothWakeupState());
+        } else {
+            SteamUtils.simpleToast(result.message || "蓝牙唤醒设置失败");
+        }
+    };
+
     return {
         enableFirmwareOverride,
         updateFirmwareOverride,
@@ -129,5 +151,7 @@ export const useAdvance = () => {
         hasGnomeShell,
         enableGnomeExtensions,
         updateGnomeExtensions,
+        bluetoothWakeup,
+        updateBluetoothWakeup,
     };
 };

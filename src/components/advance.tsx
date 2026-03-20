@@ -33,6 +33,8 @@ export const AdvanceComponent: FC = () => {
     hasGnomeShell,
     enableGnomeExtensions,
     updateGnomeExtensions,
+    bluetoothWakeup,
+    updateBluetoothWakeup,
   } = useAdvance();
 
   useEffect(() => {
@@ -211,6 +213,21 @@ export const AdvanceComponent: FC = () => {
             onChange={updateUSBWakeup}
           />
         </PanelSectionRow> */}
+        <PanelSectionRow>
+          <ToggleField
+            label={"蓝牙唤醒"}
+            description={
+              bluetoothWakeup.available
+                ? "睡眠时通过蓝牙控制器唤醒（写入 udev 规则与 power/wakeup）。部分机型需 BIOS 允许 USB 唤醒；s2idle 下体验常更接近主机。更换蓝牙硬件后请重新开关以刷新规则。"
+                : "未检测到 USB 蓝牙控制器（btusb）。"
+            }
+            checked={bluetoothWakeup.enabled}
+            disabled={!bluetoothWakeup.available}
+            onChange={(v) => {
+              void updateBluetoothWakeup(v);
+            }}
+          />
+        </PanelSectionRow>
 
         <PanelSectionRow>
           <ActionButtonItem

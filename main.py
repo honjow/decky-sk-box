@@ -54,6 +54,25 @@ class Plugin:
     async def set_usb_wakeup(self, enabled: bool):
         return utils.set_usb_wakeup(enabled)
 
+    async def get_bluetooth_wakeup_state(self):
+        try:
+            return utils.get_bluetooth_wakeup_state()
+        except Exception as e:
+            logger.error(f"Error getting bluetooth wakeup state: {e}", exc_info=True)
+            return {
+                "available": False,
+                "enabled": False,
+                "rule_present": False,
+                "devices": [],
+            }
+
+    async def set_bluetooth_wakeup(self, enabled: bool):
+        try:
+            return utils.set_bluetooth_wakeup(enabled)
+        except Exception as e:
+            logger.error(f"Error setting bluetooth wakeup: {e}", exc_info=True)
+            return {"success": False, "message": str(e)}
+
     async def get_handycon_enabled(self):
         return utils.service_is_enabled("handycon.service")
 

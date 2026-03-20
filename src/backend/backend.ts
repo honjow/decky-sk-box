@@ -48,6 +48,25 @@ export interface HibernateResult {
   message: string;
 }
 
+export interface BluetoothWakeupDevice {
+  id: string;
+  vendor: string;
+  product: string;
+  wakeup: string;
+}
+
+export interface BluetoothWakeupState {
+  available: boolean;
+  enabled: boolean;
+  rule_present: boolean;
+  devices: BluetoothWakeupDevice[];
+}
+
+export interface BluetoothWakeupResult {
+  success: boolean;
+  message: string;
+}
+
 export class Backend {
   public static async init() {}
 
@@ -76,6 +95,31 @@ export class Backend {
   // set_usb_wakeup
   public static async setUsbWakeup(value: boolean) {
     return await call("set_usb_wakeup", value);
+  }
+
+  public static async getBluetoothWakeupState(): Promise<BluetoothWakeupState> {
+    try {
+      return (await call("get_bluetooth_wakeup_state")) as BluetoothWakeupState;
+    } catch (e) {
+      console.error(`getBluetoothWakeupState error: ${e}`);
+      return {
+        available: false,
+        enabled: false,
+        rule_present: false,
+        devices: [],
+      };
+    }
+  }
+
+  public static async setBluetoothWakeup(
+    value: boolean
+  ): Promise<BluetoothWakeupResult> {
+    try {
+      return (await call("set_bluetooth_wakeup", value)) as BluetoothWakeupResult;
+    } catch (e) {
+      console.error(`setBluetoothWakeup error: ${e}`);
+      return { success: false, message: String(e) };
+    }
   }
 
   // get_handycon_enabled

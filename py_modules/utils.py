@@ -9,6 +9,7 @@ import pwd
 import queue
 import random
 import subprocess
+import tempfile
 import threading
 
 from config import (
@@ -517,6 +518,175 @@ def set_usb_wakeup(enable):
         run_command(f"sudo sed -i 's/{enable_str}/{disable_str}/g' {conf_path}")
     run_command("sudo frzr-tweaks")
     logger.info("USB唤醒设置完成")
+
+
+BLUETOOTH_WAKE_UDEV_FILE = "/etc/udev/rules.d/99-sk-box-bluetooth-wakeup.rules"
+BLUETOOTH_WAKE_UDEV_MARKER = "# managed by SK Box plugin"
+
+
+def _iter_btusb_parent_usb_ids():
+    """USB device ids (e.g. 1-10) bound to the btusb driver."""
+    drv = "/sys/bus/usb/drivers/btusb"
+    if not os.path.isdir(drv):
+        return []
+    seen = set()
+    out = []
+    try:
+        for name in os.listdir(drv):
+            if not name or not name[0].isdigit():
+                continue
+            parent = name.split(":")[0]
+            if parent in seen:
+                continue
+            dev_path = os.path.join("/sys/bus/usb/devices", parent)
+            if os.path.isdir(dev_path):
+                seen.add(parent)
+                out.append(parent)
+    except OSError as e:
+        logger.error(f"list btusb driver dir failed: {e}")
+    return sorted(out)
+
+
+def _read_btusb_usb_device(usb_id):
+    base = os.path.join("/sys/bus/usb/devices", usb_id)
+    vpath = os.path.join(base, "idVendor")
+    ppath = os.path.join(base, "idProduct")
+    wpath = os.path.join(base, "power", "wakeup")
+    if not (os.path.isfile(vpath) and os.path.isfile(ppath)):
+        return None
+    try:
+        with open(vpath, "r", encoding="utf-8", errors="replace") as f:
+            vendor = f.read().strip().lower()
+        with open(ppath, "r", encoding="utf-8", errors="replace") as f:
+            product = f.read().strip().lower()
+        wakeup = ""
+        if os.path.isfile(wpath):
+            with open(wpath, "r", encoding="utf-8", errors="replace") as f:
+                wakeup = f.read().strip()
+        return {
+            "id": usb_id,
+            "vendor": vendor,
+            "product": product,
+            "wakeup": wakeup,
+        }
+    except OSError as e:
+        logger.error(f"read btusb usb device {usb_id} failed: {e}")
+        return None
+
+
+def _managed_bluetooth_udev_present():
+    if not os.path.isfile(BLUETOOTH_WAKE_UDEV_FILE):
+        return False
+    try:
+        with open(BLUETOOTH_WAKE_UDEV_FILE, "r", encoding="utf-8", errors="replace") as f:
+            return BLUETOOTH_WAKE_UDEV_MARKER in f.read()
+    except OSError:
+        return False
+
+
+def _bluetooth_udev_reload_and_trigger():
+    run_command("sudo udevadm control --reload-rules", "udev reload-rules")
+    run_command(
+        "sudo udevadm trigger --subsystem-match=usb", "udev trigger subsystem usb"
+    )
+
+
+def _apply_bluetooth_wakeup_sysfs(usb_ids, enable):
+    val = "enabled" if enable else "disabled"
+    for usb_id in usb_ids:
+        wpath = os.path.join("/sys/bus/usb/devices", usb_id, "power", "wakeup")
+        if os.path.isfile(wpath):
+            run_command(
+                f"echo {val} | sudo tee {wpath}", f"bluetooth wakeup sysfs {usb_id}"
+            )
+
+
+def get_bluetooth_wakeup_state():
+    devices = []
+    for uid in _iter_btusb_parent_usb_ids():
+        entry = _read_btusb_usb_device(uid)
+        if entry:
+            devices.append(entry)
+    rule_present = _managed_bluetooth_udev_present()
+    with_wakeup = [d for d in devices if d.get("wakeup")]
+    if rule_present and with_wakeup:
+        enabled = all(d["wakeup"] == "enabled" for d in with_wakeup)
+    else:
+        enabled = bool(rule_present)
+    return {
+        "available": len(devices) > 0,
+        "enabled": enabled,
+        "rule_present": rule_present,
+        "devices": devices,
+    }
+
+
+def set_bluetooth_wakeup(enable):
+    devices = []
+    for uid in _iter_btusb_parent_usb_ids():
+        entry = _read_btusb_usb_device(uid)
+        if entry:
+            devices.append(entry)
+    usb_ids = [d["id"] for d in devices]
+
+    if enable:
+        if not devices:
+            return {
+                "success": False,
+                "message": "No USB Bluetooth (btusb) controller found",
+            }
+        seen_pairs = set()
+        lines = []
+        for d in devices:
+            key = (d["vendor"], d["product"])
+            if key in seen_pairs:
+                continue
+            seen_pairs.add(key)
+            v, p = key
+            lines.append(
+                'ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="%s", '
+                'ATTR{idProduct}=="%s", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"'
+                % (v, p)
+            )
+        content = BLUETOOTH_WAKE_UDEV_MARKER + "\n" + "\n".join(lines) + "\n"
+        fd, tmp_path = tempfile.mkstemp(prefix="sk-box-bt-", suffix=".rules")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as tmp:
+                tmp.write(content)
+            ok, msg = run_command(
+                f"sudo cp {tmp_path} {BLUETOOTH_WAKE_UDEV_FILE}",
+                "write bluetooth udev rules",
+            )
+            if not ok:
+                return {"success": False, "message": msg or "Failed to write udev rules"}
+            run_command(
+                f"sudo chmod 644 {BLUETOOTH_WAKE_UDEV_FILE}",
+                "chmod bluetooth udev rules",
+            )
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+        _bluetooth_udev_reload_and_trigger()
+        _apply_bluetooth_wakeup_sysfs(usb_ids, True)
+        return {"success": True, "message": ""}
+
+    if os.path.isfile(BLUETOOTH_WAKE_UDEV_FILE):
+        if _managed_bluetooth_udev_present():
+            ok, msg = run_command(
+                f"sudo rm -f {BLUETOOTH_WAKE_UDEV_FILE}",
+                "remove bluetooth udev rules",
+            )
+            if not ok:
+                return {"success": False, "message": msg or "Failed to remove udev rules"}
+        else:
+            logger.warning(
+                "Bluetooth udev rules file exists but is not managed by SK Box; skipping rm"
+            )
+    _bluetooth_udev_reload_and_trigger()
+    _apply_bluetooth_wakeup_sysfs(usb_ids, False)
+    return {"success": True, "message": ""}
 
 
 def get_github_clone_cdn():
