@@ -158,7 +158,7 @@ export class Settings {
 
     const [
       version,
-      latestVersion,
+      latestResult,
       addonVersion,
       sktVersion,
       usbWakeup,
@@ -206,7 +206,7 @@ export class Settings {
 
     // Update versions
     this.currentVersion = version;
-    this.latestVersion = latestVersion;
+    this.latestVersion = latestResult.version;
     this.addonVersion = addonVersion;
     this.sktVersion = sktVersion;
 

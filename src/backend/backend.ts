@@ -67,6 +67,35 @@ export interface BluetoothWakeupResult {
   message: string;
 }
 
+/** Result of GitHub latest-release check (from Python get_latest_version). */
+export interface LatestVersionResponse {
+  version: string;
+  error: string | null;
+  message: string;
+}
+
+function parseLatestVersionResponse(raw: unknown): LatestVersionResponse {
+  if (typeof raw === "string") {
+    return {
+      version: raw.trim(),
+      error: raw.trim() ? null : "unknown",
+      message: raw.trim() ? "" : "",
+    };
+  }
+  if (raw && typeof raw === "object") {
+    const o = raw as Record<string, unknown>;
+    return {
+      version: String(o.version ?? "").trim(),
+      error:
+        o.error === undefined || o.error === null
+          ? null
+          : String(o.error),
+      message: String(o.message ?? ""),
+    };
+  }
+  return { version: "", error: "unknown", message: "" };
+}
+
 export class Backend {
   public static async init() {}
 
@@ -78,8 +107,17 @@ export class Backend {
     return (await call("get_version")) as string;
   }
 
-  public static async getLatestVersion(): Promise<string> {
-    return (await call("get_latest_version")) as string;
+  public static async getLatestVersion(): Promise<LatestVersionResponse> {
+    try {
+      return parseLatestVersionResponse(await call("get_latest_version"));
+    } catch (e) {
+      console.error(`getLatestVersion error: ${e}`);
+      return {
+        version: "",
+        error: "unknown",
+        message: String(e),
+      };
+    }
   }
 
   // get_usb_wakeup_enabled

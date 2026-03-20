@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Backend, Settings } from "../backend";
+import { Backend, Settings, SteamUtils } from "../backend";
 import { getVersionCache, setVersionCache, getStaleVersionCache } from "../util/versionCache";
 
 export const useUpdate = () => {
@@ -12,33 +12,52 @@ export const useUpdate = () => {
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [lastCheckTime, setLastCheckTime] = useState<number | null>(null);
 
-  const fetchVersions = async () => {
+  /** Returns true when a non-empty remote latest version was received. */
+  const fetchVersions = async (opts?: { userInitiated?: boolean }): Promise<boolean> => {
     try {
-      const [current, latest] = await Promise.all([
+      const [current, latestRes] = await Promise.all([
         Backend.getVersion(),
         Backend.getLatestVersion(),
       ]);
+      const trimmed = (latestRes.version || "").trim();
       setCurrentVersion(current);
-      setLatestVersion(latest);
       Settings.currentVersion = current;
-      Settings.latestVersion = latest;
-      setVersionCache(current, latest);
-      setLastCheckTime(Date.now());
+      if (trimmed) {
+        setLatestVersion(trimmed);
+        Settings.latestVersion = trimmed;
+        setVersionCache(current, trimmed);
+        setLastCheckTime(Date.now());
+        return true;
+      }
+      console.warn(
+        `getLatestVersion empty: error=${latestRes.error} message=${latestRes.message}`
+      );
+      if (opts?.userInitiated) {
+        const hint = (latestRes.message || "").trim();
+        SteamUtils.simpleToast(
+          hint || "无法获取远程版本，请检查网络后重试"
+        );
+      }
+      return false;
     } catch (e) {
       console.error("fetchVersions error:", e);
       const stale = getStaleVersionCache();
-      if (stale) {
+      if (stale?.latestVersion) {
         setCurrentVersion(stale.currentVersion);
         setLatestVersion(stale.latestVersion);
         setLastCheckTime(stale.lastCheckTime);
       }
+      if (opts?.userInitiated) {
+        SteamUtils.simpleToast("检查更新失败，请检查网络");
+      }
+      return false;
     }
   };
 
   const checkForUpdates = async () => {
     setIsChecking(true);
     try {
-      await fetchVersions();
+      await fetchVersions({ userInitiated: true });
     } finally {
       setIsChecking(false);
     }
@@ -46,14 +65,24 @@ export const useUpdate = () => {
 
   useEffect(() => {
     const init = async () => {
+      // Settings.init() already fetched versions; do not let localStorage cache overwrite fresher data.
+      setCurrentVersion(Settings.currentVersion);
+      setLatestVersion(Settings.latestVersion);
+
       const cache = getVersionCache();
       if (cache) {
-        setCurrentVersion(cache.currentVersion);
-        setLatestVersion(cache.latestVersion);
         setLastCheckTime(cache.lastCheckTime);
-        Settings.currentVersion = cache.currentVersion;
-        Settings.latestVersion = cache.latestVersion;
-      } else {
+      }
+
+      if (!Settings.latestVersion?.trim()) {
+        const stale = getStaleVersionCache();
+        if (stale?.latestVersion?.trim()) {
+          setCurrentVersion(stale.currentVersion);
+          setLatestVersion(stale.latestVersion.trim());
+          setLastCheckTime(stale.lastCheckTime);
+        }
+        await fetchVersions();
+      } else if (!getVersionCache()) {
         await fetchVersions();
       }
 
